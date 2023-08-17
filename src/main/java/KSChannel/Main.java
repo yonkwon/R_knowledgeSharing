@@ -38,17 +38,20 @@ public class Main {
   static double[] P_SEEKING = new double[]{.1, .5, .9};
   static int LENGTH_P_SEEKING = P_SEEKING.length;
 
+  static double[] EPSILON = new double[]{0, .1, .2};
+  static int LENGTH_EPSILON = P_SEEKING.length;
+
   static double P_LEARNING = .2;
 
   //Instrumental Params
   static double M_N = M * N;
 
   static final int[] RESULT_KEY_VALUE = {
-      LENGTH_BETA, LENGTH_P_SHARING, LENGTH_P_SEEKING, TIME
+      LENGTH_BETA, LENGTH_P_SHARING, LENGTH_P_SEEKING, LENGTH_EPSILON, TIME
   };
 
   static final int[] RESULT_KEY_VALUE_RANK = {
-      LENGTH_BETA, LENGTH_P_SHARING, LENGTH_P_SEEKING, TIME, N
+      LENGTH_BETA, LENGTH_P_SHARING, LENGTH_P_SEEKING, LENGTH_EPSILON, TIME, N
   };
 
   static String LABEL = "KSChannel";
@@ -79,7 +82,9 @@ public class Main {
       + "p1"
       + LENGTH_P_SHARING
       + "p2"
-      + LENGTH_P_SEEKING;
+      + LENGTH_P_SEEKING
+      + "e"
+      + LENGTH_EPSILON;
 
   static String PATH_CSV = new File(".").getAbsolutePath() + "\\" + LABEL + PARAMS + "\\";
 

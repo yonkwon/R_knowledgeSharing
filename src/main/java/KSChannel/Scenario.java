@@ -22,6 +22,8 @@ public class Scenario {
   double[] pSharingOf;
   double pSeeking;
   double[] pSeekingOf;
+  double epsilon;
+  double[] epsilonOf;
 
   boolean[] reality;
   boolean[][] belief;
@@ -68,19 +70,21 @@ public class Scenario {
   double[] rankApplicationRateNegative;
   double[] rankCentrality;
 
-  Scenario(double beta, double pSharing, double pSeeking) {
+  Scenario(double beta, double pSharing, double pSeeking, double epsilon) {
     this.beta = beta;
     this.pSharing = pSharing;
     this.pSeeking = pSeeking;
+    this.epsilon = epsilon;
     this.isCavemen = Main.IS_CAVEMEN;
     this.isCostly = Main.IS_LEARNING_COSTLY;
     this.isGreedy = Main.IS_LEARNING_GREEDY;
   }
 
-  Scenario(double beta, double pSharing, double pSeeking, boolean isCavemen, boolean isCostly, boolean isGreedy) {
+  Scenario(double beta, double pSharing, double pSeeking, double epsilon, boolean isCavemen, boolean isCostly, boolean isGreedy) {
     this.beta = beta;
     this.pSharing = pSharing;
     this.pSeeking = pSeeking;
+    this.epsilon = epsilon;
     this.isCavemen = isCavemen;
     this.isCostly = isCostly;
     this.isGreedy = isGreedy;
@@ -121,6 +125,7 @@ public class Scenario {
     knowledgeWorst = Integer.MAX_VALUE;
     pSharingOf = new double[Main.N];
     pSeekingOf = new double[Main.N];
+    epsilonOf = new double[Main.N];
 
     // Reality & Belief
     for (int m : mIndexArray) {
@@ -163,6 +168,7 @@ public class Scenario {
     for (int n : focalIndexArray) {
       pSharingOf[n] = pSharing;
       pSeekingOf[n] = pSeeking;
+      epsilonOf[n] = epsilon;
     }
 
   }
@@ -270,27 +276,29 @@ public class Scenario {
       }
       if (isSeeking[focal]) {
         shuffleFisherYates(networkEgo[focal]);
-        int target2Learn = -1;
-        double knowledge2Learn = knowledge[focal];
-        for (int target : networkEgo[focal]) {
-          if (isCostly && isBusy[target]) {
+        int target = -1;
+        double targetKnowledge = knowledge[focal];
+        for (int contact : networkEgo[focal]) {
+          if (isCostly && isBusy[contact]) {
             continue;
           }
-          if (isSharing[target] && knowledge[target] > knowledge2Learn) {
-            target2Learn = target;
+          if (isSharing[contact] && getIsBetterThan(knowledge[contact], targetKnowledge, epsilonOf[focal])){
+            target = contact;
             if (isGreedy) {
-              knowledge2Learn = knowledge[target];
+              targetKnowledge = knowledge[contact];
+            }else{
+              break;
             }
           }
         }
-        if( target2Learn != -1 ){
+        if( target != -1 ){
           isBusy[focal] = true;
-          isBusy[target2Learn] = true;
+          isBusy[target] = true;
           for (int m : mIndexArray) {
-            if (belief[focal][m] != belief[target2Learn][m] && r.nextDouble() < Main.P_LEARNING) {
-              belief[focal][m] = belief[target2Learn][m];
+            if (belief[focal][m] != belief[target][m] && r.nextDouble() < Main.P_LEARNING) {
+              belief[focal][m] = belief[target][m];
               beliefSourceCount[focal][beliefSource[focal][m]]--;
-              beliefSource[focal][m] = beliefSource[target2Learn][m];
+              beliefSource[focal][m] = beliefSource[target][m];
               beliefSourceCount[focal][beliefSource[focal][m]]++;
             }
           }
@@ -300,6 +308,14 @@ public class Scenario {
     }
     for (int focal : focalIndexArray) {
       knowledgeCum[focal] += knowledge[focal];
+    }
+  }
+
+  boolean getIsBetterThan(double focal, double target, double epsilon){
+    if( r.nextDouble() < epsilon ){
+      return focal > target;
+    }else{
+      return focal < target;
     }
   }
 
