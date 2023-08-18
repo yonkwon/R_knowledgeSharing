@@ -23,7 +23,7 @@ public class Main {
   static int N = N_OF_GROUP * N_IN_GROUP;
   static int M = 50;
   static int S = 5;
-  static int TIME = 3000 + 1;
+  static int TIME = 1000 + 1;
 
   //Moving Params
   static double[] BETA = {0};

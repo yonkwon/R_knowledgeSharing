@@ -313,9 +313,9 @@ public class Scenario {
 
   boolean getIsBetterThan(double focal, double target, double epsilon){
     if( r.nextDouble() < epsilon ){
-      return focal > target;
-    }else{
       return focal < target;
+    }else{
+      return focal > target;
     }
   }
 
