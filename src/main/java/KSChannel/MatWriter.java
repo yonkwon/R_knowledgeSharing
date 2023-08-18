@@ -71,7 +71,7 @@ class MatWriter {
               centralizationSTD.setDouble(indices, c.centralizationSTD[b][p1][p2][e][t]);
 
               for (int n = 0; n < Main.N; n++) {
-                int[] indicesRank = {b, p1, p2, t, n};
+                int[] indicesRank = {b, p1, p2, e, t, n};
                 rankKnowledgeAVG.setDouble(indicesRank, c.rankKnowledgeAVG[b][p1][p2][e][t][n]);
                 rankKnowledgeSTD.setDouble(indicesRank, c.rankKnowledgeSTD[b][p1][p2][e][t][n]);
                 rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[b][p1][p2][e][t][n]);
