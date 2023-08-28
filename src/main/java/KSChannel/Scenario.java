@@ -313,8 +313,10 @@ public class Scenario {
 
   boolean getIsBetterThan(double focal, double target, double epsilon){
     if( r.nextDouble() < epsilon ){
+      //Screening error
       return focal < target;
     }else{
+      //No screening error
       return focal > target;
     }
   }
@@ -485,12 +487,12 @@ public class Scenario {
       rankContribution[focal] /= Main.M_N;
       rankContributionPositive[focal] /= Main.M_N;
       rankContributionNegative[focal] /= Main.M_N;
-      rankContributionBest[focal] /= (double) Main.M;
-      rankContributionBestPositive[focal] /= (double) Main.M;
-      rankContributionBestNegative[focal] /= (double) Main.M;
-      rankApplicationRate[focal] /= (double) Main.M;
-      rankApplicationRatePositive[focal] /= (double) nCorrectBelief0[focal];
-      rankApplicationRateNegative[focal] /= (double) nIncorrectBelief0[focal];
+      rankContributionBest[focal] /= Main.M;
+      rankContributionBestPositive[focal] /= Main.M;
+      rankContributionBestNegative[focal] /= Main.M;
+      rankApplicationRate[focal] /= Main.M;
+      rankApplicationRatePositive[focal] /= nCorrectBelief0[focal];
+      rankApplicationRateNegative[focal] /= nIncorrectBelief0[focal];
     }
   }
 
@@ -517,7 +519,7 @@ public class Scenario {
       centralization += (maxCentrality - rankCentrality[rank]);
     }
 
-    centralization /= (double) Main.N; // Theoretical maximum of Sum[Cx(p*)-Cx(pi)] over 1:N
+    centralization /= Main.N; // Theoretical maximum of Sum[Cx(p*)-Cx(pi)] over 1:N
   }
 
   void shuffleFisherYates(int[] nArray) {
