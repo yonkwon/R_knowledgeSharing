@@ -50,50 +50,50 @@ class MatWriter {
     Matrix rankCentralitySTD = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
 
     for (int b = 0; b < Main.LENGTH_BETA; b++) {
+      for (int e = 0; e < Main.LENGTH_EPSILON; e++) {
       for (int p1 = 0; p1 < Main.LENGTH_P_SHARING; p1++) {
         for (int p2 = 0; p2 < Main.LENGTH_P_SEEKING; p2++) {
-          for (int e = 0; e < Main.LENGTH_EPSILON; e++) {
             for (int t = 0; t < Main.TIME; t++) {
-              int[] indices = {b, p1, p2, e, t};
-              knowledgeAVG.setDouble(indices, c.knowledgeAVG[b][p1][p2][e][t]);
-              knowledgeSTD.setDouble(indices, c.knowledgeSTD[b][p1][p2][e][t]);
-              knowledgeBestAVG.setDouble(indices, c.knowledgeBestAVG[b][p1][p2][e][t]);
-              knowledgeBestSTD.setDouble(indices, c.knowledgeBestSTD[b][p1][p2][e][t]);
-              knowledgeBestSourceDiversityAVG.setDouble(indices, c.knowledgeBestSourceDiversityAVG[b][p1][p2][e][t]);
-              knowledgeBestSourceDiversitySTD.setDouble(indices, c.knowledgeBestSourceDiversitySTD[b][p1][p2][e][t]);
-              knowledgeMinMaxAVG.setDouble(indices, c.knowledgeMinMaxAVG[b][p1][p2][e][t]);
-              knowledgeMinMaxSTD.setDouble(indices, c.knowledgeMinMaxSTD[b][p1][p2][e][t]);
-              beliefDiversityAVG.setDouble(indices, c.beliefDiversityAVG[b][p1][p2][e][t]);
-              beliefDiversitySTD.setDouble(indices, c.beliefDiversitySTD[b][p1][p2][e][t]);
-              beliefSourceDiversityAVG.setDouble(indices, c.beliefSourceDiversityAVG[b][p1][p2][e][t]);
-              beliefSourceDiversitySTD.setDouble(indices, c.beliefSourceDiversitySTD[b][p1][p2][e][t]);
-              centralizationAVG.setDouble(indices, c.centralizationAVG[b][p1][p2][e][t]);
-              centralizationSTD.setDouble(indices, c.centralizationSTD[b][p1][p2][e][t]);
+              int[] indices = {b, e, p1, p2, t};
+              knowledgeAVG.setDouble(indices, c.knowledgeAVG[b][e][p1][p2][t]);
+              knowledgeSTD.setDouble(indices, c.knowledgeSTD[b][e][p1][p2][t]);
+              knowledgeBestAVG.setDouble(indices, c.knowledgeBestAVG[b][e][p1][p2][t]);
+              knowledgeBestSTD.setDouble(indices, c.knowledgeBestSTD[b][e][p1][p2][t]);
+              knowledgeBestSourceDiversityAVG.setDouble(indices, c.knowledgeBestSourceDiversityAVG[b][e][p1][p2][t]);
+              knowledgeBestSourceDiversitySTD.setDouble(indices, c.knowledgeBestSourceDiversitySTD[b][e][p1][p2][t]);
+              knowledgeMinMaxAVG.setDouble(indices, c.knowledgeMinMaxAVG[b][e][p1][p2][t]);
+              knowledgeMinMaxSTD.setDouble(indices, c.knowledgeMinMaxSTD[b][e][p1][p2][t]);
+              beliefDiversityAVG.setDouble(indices, c.beliefDiversityAVG[b][e][p1][p2][t]);
+              beliefDiversitySTD.setDouble(indices, c.beliefDiversitySTD[b][e][p1][p2][t]);
+              beliefSourceDiversityAVG.setDouble(indices, c.beliefSourceDiversityAVG[b][e][p1][p2][t]);
+              beliefSourceDiversitySTD.setDouble(indices, c.beliefSourceDiversitySTD[b][e][p1][p2][t]);
+              centralizationAVG.setDouble(indices, c.centralizationAVG[b][e][p1][p2][t]);
+              centralizationSTD.setDouble(indices, c.centralizationSTD[b][e][p1][p2][t]);
 
               for (int n = 0; n < Main.N; n++) {
-                int[] indicesRank = {b, p1, p2, e, t, n};
-                rankKnowledgeAVG.setDouble(indicesRank, c.rankKnowledgeAVG[b][p1][p2][e][t][n]);
-                rankKnowledgeSTD.setDouble(indicesRank, c.rankKnowledgeSTD[b][p1][p2][e][t][n]);
-                rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[b][p1][p2][e][t][n]);
-                rankContributionSTD.setDouble(indicesRank, c.rankContributionSTD[b][p1][p2][e][t][n]);
-                rankContributionPositiveAVG.setDouble(indicesRank, c.rankContributionPositiveAVG[b][p1][p2][e][t][n]);
-                rankContributionPositiveSTD.setDouble(indicesRank, c.rankContributionPositiveSTD[b][p1][p2][e][t][n]);
-                rankContributionNegativeAVG.setDouble(indicesRank, c.rankContributionNegativeAVG[b][p1][p2][e][t][n]);
-                rankContributionNegativeSTD.setDouble(indicesRank, c.rankContributionNegativeSTD[b][p1][p2][e][t][n]);
-                rankContributionBestAVG.setDouble(indicesRank, c.rankContributionBestAVG[b][p1][p2][e][t][n]);
-                rankContributionBestSTD.setDouble(indicesRank, c.rankContributionBestSTD[b][p1][p2][e][t][n]);
-                rankContributionBestPositiveAVG.setDouble(indicesRank, c.rankContributionBestPositiveAVG[b][p1][p2][e][t][n]);
-                rankContributionBestPositiveSTD.setDouble(indicesRank, c.rankContributionBestPositiveSTD[b][p1][p2][e][t][n]);
-                rankContributionBestNegativeAVG.setDouble(indicesRank, c.rankContributionBestNegativeAVG[b][p1][p2][e][t][n]);
-                rankContributionBestNegativeSTD.setDouble(indicesRank, c.rankContributionBestNegativeSTD[b][p1][p2][e][t][n]);
-                rankApplicationRateAVG.setDouble(indicesRank, c.rankApplicationRateAVG[b][p1][p2][e][t][n]);
-                rankApplicationRateSTD.setDouble(indicesRank, c.rankApplicationRateSTD[b][p1][p2][e][t][n]);
-                rankApplicationRatePositiveAVG.setDouble(indicesRank, c.rankApplicationRatePositiveAVG[b][p1][p2][e][t][n]);
-                rankApplicationRatePositiveSTD.setDouble(indicesRank, c.rankApplicationRatePositiveSTD[b][p1][p2][e][t][n]);
-                rankApplicationRateNegativeAVG.setDouble(indicesRank, c.rankApplicationRateNegativeAVG[b][p1][p2][e][t][n]);
-                rankApplicationRateNegativeSTD.setDouble(indicesRank, c.rankApplicationRateNegativeSTD[b][p1][p2][e][t][n]);
-                rankCentralityAVG.setDouble(indicesRank, c.rankCentralityAVG[b][p1][p2][e][t][n]);
-                rankCentralitySTD.setDouble(indicesRank, c.rankCentralitySTD[b][p1][p2][e][t][n]);
+                int[] indicesRank = {b, e, p1, p2, t, n};
+                rankKnowledgeAVG.setDouble(indicesRank, c.rankKnowledgeAVG[b][e][p1][p2][t][n]);
+                rankKnowledgeSTD.setDouble(indicesRank, c.rankKnowledgeSTD[b][e][p1][p2][t][n]);
+                rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[b][e][p1][p2][t][n]);
+                rankContributionSTD.setDouble(indicesRank, c.rankContributionSTD[b][e][p1][p2][t][n]);
+                rankContributionPositiveAVG.setDouble(indicesRank, c.rankContributionPositiveAVG[b][e][p1][p2][t][n]);
+                rankContributionPositiveSTD.setDouble(indicesRank, c.rankContributionPositiveSTD[b][e][p1][p2][t][n]);
+                rankContributionNegativeAVG.setDouble(indicesRank, c.rankContributionNegativeAVG[b][e][p1][p2][t][n]);
+                rankContributionNegativeSTD.setDouble(indicesRank, c.rankContributionNegativeSTD[b][e][p1][p2][t][n]);
+                rankContributionBestAVG.setDouble(indicesRank, c.rankContributionBestAVG[b][e][p1][p2][t][n]);
+                rankContributionBestSTD.setDouble(indicesRank, c.rankContributionBestSTD[b][e][p1][p2][t][n]);
+                rankContributionBestPositiveAVG.setDouble(indicesRank, c.rankContributionBestPositiveAVG[b][e][p1][p2][t][n]);
+                rankContributionBestPositiveSTD.setDouble(indicesRank, c.rankContributionBestPositiveSTD[b][e][p1][p2][t][n]);
+                rankContributionBestNegativeAVG.setDouble(indicesRank, c.rankContributionBestNegativeAVG[b][e][p1][p2][t][n]);
+                rankContributionBestNegativeSTD.setDouble(indicesRank, c.rankContributionBestNegativeSTD[b][e][p1][p2][t][n]);
+                rankApplicationRateAVG.setDouble(indicesRank, c.rankApplicationRateAVG[b][e][p1][p2][t][n]);
+                rankApplicationRateSTD.setDouble(indicesRank, c.rankApplicationRateSTD[b][e][p1][p2][t][n]);
+                rankApplicationRatePositiveAVG.setDouble(indicesRank, c.rankApplicationRatePositiveAVG[b][e][p1][p2][t][n]);
+                rankApplicationRatePositiveSTD.setDouble(indicesRank, c.rankApplicationRatePositiveSTD[b][e][p1][p2][t][n]);
+                rankApplicationRateNegativeAVG.setDouble(indicesRank, c.rankApplicationRateNegativeAVG[b][e][p1][p2][t][n]);
+                rankApplicationRateNegativeSTD.setDouble(indicesRank, c.rankApplicationRateNegativeSTD[b][e][p1][p2][t][n]);
+                rankCentralityAVG.setDouble(indicesRank, c.rankCentralityAVG[b][e][p1][p2][t][n]);
+                rankCentralitySTD.setDouble(indicesRank, c.rankCentralitySTD[b][e][p1][p2][t][n]);
               }
             }
           }

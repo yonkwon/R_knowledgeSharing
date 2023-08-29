@@ -18,12 +18,12 @@ public class Scenario {
   boolean isGreedy;
 
   double beta;
+  double epsilon;
+  double[] epsilonOf;
   double pSharing;
   double[] pSharingOf;
   double pSeeking;
   double[] pSeekingOf;
-  double epsilon;
-  double[] epsilonOf;
 
   boolean[] reality;
   boolean[][] belief;
@@ -70,21 +70,21 @@ public class Scenario {
   double[] rankApplicationRateNegative;
   double[] rankCentrality;
 
-  Scenario(double beta, double pSharing, double pSeeking, double epsilon) {
+  Scenario(double beta, double epsilon, double pSharing, double pSeeking) {
     this.beta = beta;
+    this.epsilon = epsilon;
     this.pSharing = pSharing;
     this.pSeeking = pSeeking;
-    this.epsilon = epsilon;
     this.isCavemen = Main.IS_CAVEMEN;
     this.isCostly = Main.IS_LEARNING_COSTLY;
     this.isGreedy = Main.IS_LEARNING_GREEDY;
   }
 
-  Scenario(double beta, double pSharing, double pSeeking, double epsilon, boolean isCavemen, boolean isCostly, boolean isGreedy) {
+  Scenario(double beta, double epsilon, double pSharing, double pSeeking, boolean isCavemen, boolean isCostly, boolean isGreedy) {
     this.beta = beta;
+    this.epsilon = epsilon;
     this.pSharing = pSharing;
     this.pSeeking = pSeeking;
-    this.epsilon = epsilon;
     this.isCavemen = isCavemen;
     this.isCostly = isCostly;
     this.isGreedy = isGreedy;

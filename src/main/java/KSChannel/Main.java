@@ -14,7 +14,7 @@ public class Main {
 
   //Key Assumptions
   static boolean IS_CAVEMEN = false;
-  static boolean IS_LEARNING_COSTLY = true;
+  static boolean IS_LEARNING_COSTLY = false;
   static boolean IS_LEARNING_GREEDY = false;
 
   //Global Parameters
@@ -23,7 +23,7 @@ public class Main {
   static int N = N_OF_GROUP * N_IN_GROUP;
   static int M = 50;
   static int S = 5;
-  static int TIME = 1000 + 1;
+  static int TIME = 2000 + 1;
 
   //Moving Params
   static double[] BETA = {0};
@@ -40,7 +40,7 @@ public class Main {
 
   static double[] EPSILON = new double[]{0};
 //  static double[] EPSILON = new double[]{0, .15, .3, .45};
-  static int LENGTH_EPSILON = P_SEEKING.length;
+  static int LENGTH_EPSILON = EPSILON.length;
 
   static double P_LEARNING = .2;
 
@@ -48,11 +48,11 @@ public class Main {
   static double M_N = M * N;
 
   static final int[] RESULT_KEY_VALUE = {
-      LENGTH_BETA, LENGTH_P_SHARING, LENGTH_P_SEEKING, LENGTH_EPSILON, TIME
+      LENGTH_BETA, LENGTH_EPSILON, LENGTH_P_SHARING, LENGTH_P_SEEKING, TIME
   };
 
   static final int[] RESULT_KEY_VALUE_RANK = {
-      LENGTH_BETA, LENGTH_P_SHARING, LENGTH_P_SEEKING, LENGTH_EPSILON, TIME, N
+      LENGTH_BETA, LENGTH_EPSILON, LENGTH_P_SHARING, LENGTH_P_SEEKING, TIME, N
   };
 
   static String LABEL = "KSChannel";
@@ -80,12 +80,12 @@ public class Main {
       + P_LEARNING
       + "B"
       + LENGTH_BETA
+      + "e"
+      + LENGTH_EPSILON
       + "p1"
       + LENGTH_P_SHARING
       + "p2"
-      + LENGTH_P_SEEKING
-      + "e"
-      + LENGTH_EPSILON;
+      + LENGTH_P_SEEKING;
 
   static String PATH_CSV = new File(".").getAbsolutePath() + "\\" + LABEL + PARAMS + "\\";
 
