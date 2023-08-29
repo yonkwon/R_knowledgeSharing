@@ -30,7 +30,7 @@ public class Main {
 //  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static int LENGTH_BETA = BETA.length;
 
-  static int[] COST = new int[]{1, 5, 10};
+  static int[] COST = new int[]{1, 5, 10, 40};
   static int LENGTH_COST = COST.length;
 
   static double[] P_SHARING = new double[]{.1, .5, .9};
