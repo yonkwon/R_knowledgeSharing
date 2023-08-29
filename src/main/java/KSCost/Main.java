@@ -93,11 +93,4 @@ public class Main {
       System.out.println(LABEL + ":\t" + PARAMS);
     }
   }
-
-  private static void fillArray(double[] array) {
-    double stride = 1D / (array.length - 1);
-    for (int i = 0; i < array.length; i++) {
-      array[i] = i * stride;
-    }
-  }
 }
