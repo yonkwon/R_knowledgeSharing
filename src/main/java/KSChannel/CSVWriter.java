@@ -11,9 +11,9 @@ public class CSVWriter {
   boolean isCostly = true;
   boolean isGreedy = false;
   double beta = 0;
+  double epsilon = 0;
   double pSharing = .5;
   double pSeeking = .5;
-  double epsilon = 0;
   int time = 3000;
 
   Scenario sc;
@@ -28,14 +28,14 @@ public class CSVWriter {
         "greed" + (isGreedy ? 1 : 0) +
         "]" +
         "b" + beta +
+        "e_" + epsilon +
         "p1_" + pSharing +
         "p2_" + pSeeking +
-        "e_" + epsilon +
         "t" + time);
   }
 
   void initializeScenario() {
-    sc = new Scenario(beta, pSharing, pSeeking, epsilon, isCavemen, isCostly, isGreedy);
+    sc = new Scenario(beta, epsilon, pSharing, pSeeking, isCavemen, isCostly, isGreedy);
     sc.initialize();
   }
 

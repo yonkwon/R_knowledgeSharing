@@ -32,15 +32,15 @@ public class Main {
 //  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static int LENGTH_BETA = BETA.length;
 
+  static double[] EPSILON = new double[]{0};
+//  static double[] EPSILON = new double[]{0, .15, .3, .45};
+  static int LENGTH_EPSILON = EPSILON.length;
+
   static double[] P_SHARING = new double[]{.1, .5, .9};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
   static double[] P_SEEKING = new double[]{.1, .5, .9};
   static int LENGTH_P_SEEKING = P_SEEKING.length;
-
-  static double[] EPSILON = new double[]{0};
-//  static double[] EPSILON = new double[]{0, .15, .3, .45};
-  static int LENGTH_EPSILON = EPSILON.length;
 
   static double P_LEARNING = .2;
 
