@@ -51,7 +51,7 @@ set_fig1_t <- data$para.time
 set_fig1_beta <- 1
 set_fig1_epsilon <- 1
 
-set_fig1_outcome <- data$r.know.avg[set_fig1_beta, , , set_fig1_epsilon, set_fig1_t]
+set_fig1_outcome <- data$r.know.avg[set_fig1_beta, set_fig1_epsilon, , , set_fig1_t]
 set_fig1_outcome_label <- 'Firm Performance'
 
 df_fig1 <- data.frame()
@@ -100,10 +100,10 @@ set_fig2_p2 <- 1:data$para.l.p2
 # set_fig2_p1 <- c(2, 4, 6, 8)
 # set_fig2_p2 <- c(2, 4, 6, 8)
 
-set_fig2_outcome <- data$r.know.avg[set_fig2_beta, , , set_fig2_epsilon, set_fig2_time]
+set_fig2_outcome <- data$r.know.avg[set_fig2_beta, set_fig2_epsilon, , , set_fig2_time]
 set_fig2_outcome_label <- 'Firm Performance'
 
-set_fig2_outcome <- data$r.cent.avg[set_fig2_beta, , , set_fig2_epsilon, set_fig2_time]
+set_fig2_outcome <- data$r.cent.avg[set_fig2_beta, set_fig2_epsilon, , , set_fig2_time]
 set_fig2_outcome_label <- 'Centralization'
 
 df_fig2 <- data.frame()
