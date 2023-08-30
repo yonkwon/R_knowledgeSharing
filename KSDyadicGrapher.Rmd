@@ -1,0 +1,109 @@
+---
+title: "KSDyadicGrapher: Graphing Tool for The Model of Knowledge Sharing (as dyadic knowledge transfer)"
+author: "Yon Kwon"
+date: "8/28/2023"
+output: html_document
+---
+
+# Grapher for Tzogos Sequel
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE) 
+library(R.matlab)
+library(tidyverse) # tibble (dataframe)
+library(ggplot2) # Plot
+library(ggrepel) # geom_text_repel
+library(scales) # parse_format() function
+library(viridis) # colormap
+library(ggsci) # colormap
+library(svglite) # print in *.svg format
+```
+
+## Data Import
+```{r data_file, eval=FALSE}
+# rm(list=c('data'))
+setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # Set SRC DIR as WD
+file_data <- file.choose()
+data <- readMat(file_data)
+fig_id <- tools::file_path_sans_ext((basename(file_data)))
+```
+
+## User Config
+```{r usr_config}
+fig_width <- 6
+fig_height <- 4
+fig_dpi <- 600
+fig_alpha <- .75
+label_size <- 12
+tick_label_size <- 10
+legend_size <- 10
+fig_open <- T # Open figure on R dev. env.
+fig_save <- T # Save figure as *.svg
+
+ci_alpha <- .99
+ci_multiplier <- as.numeric(qnorm(ci_alpha) / sqrt(data$para.iteration))
+```
+
+## Figure 2. t * Knowledge Sharing -> Performance
+```{r fig2}
+set_fig2_beta <- 1
+set_fig2_p.s <- 1:data$para.l.p.s
+set_fig2_p.s <- c(1, 5, 9)
+set_fig2_time_limit <- data$para.time
+set_fig2_time <- 1:set_fig2_time_limit
+
+set_fig2_outcome <- data$r.know.avg[set_fig2_beta, , set_fig2_time]
+set_fig2_outcome_label <- 'Firm Performance'
+
+# set_fig2_outcome <- data$r.cent.avg[set_fig2_beta, set_fig2_epsilon, , , set_fig2_time]
+# set_fig2_outcome_label <- 'Centralization'
+
+df_fig2 <- data.frame()
+for( p.s in set_fig2_p.s ){
+  df_next <- data.frame(
+    p.s = paste0('p[sharing]==',data$para.a.p.s[p.s]),
+    time= 1:data$para.time,
+    outcome = set_fig2_outcome[p.s,]
+  )
+  df_fig2 <- rbind(df_fig2, df_next)
+}
+
+
+
+fig2 <- ggplot(df_fig2, aes(x = time, y = outcome, color = p.s)) +
+  geom_line() +
+  scale_color_aaas(labels = parse_format()) +
+  scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab('Time Periods') +
+  ylab(set_fig2_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig2
+
+fig2_params_label <- paste0(
+  'fig2',
+  'b', data$para.a.b[set_fig2_beta],
+  'e', data$para.a.e[set_fig2_epsilon],
+  'p.s', paste0(set_fig2_p.s, collapse = ","),
+  'p2', paste0(set_fig2_p2, collapse = ","),
+  'res_', set_fig2_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig2_params_label, '.png'),
+  plot = fig2,
+  units = 'in', 
+  width = 6,
+  height = 3,
+  dpi = fig_dpi
+)
+```
