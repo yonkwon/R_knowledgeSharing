@@ -1,6 +1,7 @@
 package KSChannel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -312,7 +313,7 @@ public class Scenario {
   }
 
   boolean getIsBetterThan(double focal, double target, double epsilon){
-    if( r.nextDouble() < epsilon ){
+    if( r.nextDouble() <= epsilon ){
       //Screening error
       return focal < target;
     }else{
