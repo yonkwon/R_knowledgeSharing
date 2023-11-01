@@ -72,7 +72,7 @@ for( p.s in set_fig2_p.s ){
 
 fig2 <- ggplot(df_fig2, aes(x = time, y = outcome, color = p.s)) +
   geom_line() +
-  scale_color_aaas(labels = parse_format()) +
+  scale_color_npg(labels = parse_format()) +
   scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
   scale_x_continuous(expand = c(0, 0)) +
   xlab('Time Periods') +
@@ -92,9 +92,7 @@ fig2
 fig2_params_label <- paste0(
   'fig2',
   'b', data$para.a.b[set_fig2_beta],
-  'e', data$para.a.e[set_fig2_epsilon],
   'p.s', paste0(set_fig2_p.s, collapse = ","),
-  'p2', paste0(set_fig2_p2, collapse = ","),
   'res_', set_fig2_outcome_label
 )
 
@@ -102,8 +100,68 @@ ggsave(
   paste0(fig_id, '_', fig2_params_label, '.png'),
   plot = fig2,
   units = 'in', 
-  width = 6,
-  height = 3,
+  width = 4,
+  height = 2,
+  dpi = fig_dpi
+)
+```
+
+
+## Figure 3. beta * Knowledge Sharing -> Performance @ t
+```{r fig3}
+set_fig3_beta <- 1:data$para.l.b
+# set_fig3_p.s <- 1:data$para.l.p.s
+set_fig3_p.s <- c(1, 5, 9)
+set_fig3_time <- data$para.time
+
+set_fig3_outcome <- data$r.know.avg[set_fig3_beta, , set_fig3_time]
+set_fig3_outcome_label <- 'Firm Performance'
+
+# set_fig3_outcome <- data$r.cent.avg[set_fig3_beta, set_fig3_epsilon, , , set_fig3_time]
+# set_fig3_outcome_label <- 'Centralization'
+
+df_fig3 <- data.frame()
+for( p.s in set_fig3_p.s ){
+  df_next <- data.frame(
+    beta = data$para.a.b[set_fig3_beta],
+    p.s = paste0('p[sharing]==',data$para.a.p.s[,p.s]),
+    outcome = set_fig3_outcome[,p.s]
+  )
+  df_fig3 <- rbind(df_fig3, df_next)
+}
+
+fig3 <- ggplot(df_fig3, aes(x = beta, y = outcome, color = p.s)) +
+  geom_line() +
+  scale_color_npg(labels = parse_format()) +
+  scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab('Structural Integration (Beta)') +
+  ylab(set_fig3_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig3
+
+fig3_params_label <- paste0(
+  'fig3',
+  'p.s', paste0(set_fig3_p.s, collapse = ","),
+  'time', set_fig3_time,
+  'res_', set_fig3_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig3_params_label, '.png'),
+  plot = fig3,
+  units = 'in', 
+  width = 4,
+  height = 2,
   dpi = fig_dpi
 )
 ```

@@ -368,7 +368,7 @@ class Computation {
       for (int b = 0; b < Main.LENGTH_BETA; b++) {
         for (int e = 0; e < Main.LENGTH_EPSILON; e++) {
           for (int p1 = 0; p1 < Main.LENGTH_P_SHARING; p1++) {
-            for (int p2 = 0; p2 < Main.LENGTH_P_SHARING; p2++) {
+            for (int p2 = 0; p2 < Main.LENGTH_P_SEEKING; p2++) {
               new SingleRun(b, e, p1, p2);
             }
           }

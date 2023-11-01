@@ -49,7 +49,7 @@ ci_multiplier <- as.numeric(qnorm(ci_alpha) / sqrt(data$para.iteration))
 set_fig1_t <- data$para.time
 # set_fig1_t <- 10
 set_fig1_beta <- 1
-set_fig1_cost <- 1
+set_fig1_cost <- 4
 
 set_fig1_outcome <- data$r.know.avg[set_fig1_beta, set_fig1_cost, , , set_fig1_t]
 set_fig1_outcome_label <- 'Firm Performance'
@@ -84,12 +84,28 @@ fig1 <- ggplot(df_fig1, aes(x = p1, y = p2, fill = outcome)) +
 
 
 fig1
+
+fig1_params_label <- paste0(
+  'fig1',
+  'b', data$para.a.b[set_fig1_beta],
+  'c', data$para.a.c[set_fig1_cost],
+  'res_', set_fig1_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig1_params_label, '.png'),
+  plot = fig1,
+  units = 'in', 
+  width = 6,
+  height = 3,
+  dpi = fig_dpi
+)
 ```
 
 ## Figure 2. t * Knowledge Sharing * Seeking -> Performance
 ```{r fig2}
 set_fig2_beta <- 1
-set_fig2_cost <- 4
+set_fig2_cost <- 1
 
 set_fig2_time_limit <- data$para.time
 set_fig2_time <- 1:set_fig2_time_limit
@@ -124,7 +140,7 @@ for( p1 in set_fig2_p1 ){
 fig2 <- ggplot(df_fig2, aes(x = time, y = outcome, linetype = p2, color = p1)) +
   geom_line() +
   scale_color_aaas(labels = parse_format()) +
-  scale_linetype_discrete(labels = parse_format(), values = c(':','--','-')) +
+  scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
   scale_x_continuous(expand = c(0, 0)) +
   xlab('Time Periods') +
   ylab(set_fig2_outcome_label) +

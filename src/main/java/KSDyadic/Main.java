@@ -5,38 +5,40 @@ import java.io.File;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 1000;
+  static int ITERATION = 5000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
   //Output Setup
-  static final boolean GET_CSV = true;
-  static final boolean GET_MAT = false;
+  static final boolean GET_CSV = false;
+  static final boolean GET_MAT = true;
 
   //Key Assumptions
-  static boolean IS_RATIO = true;
-  //    static boolean IS_RATIO = false;
+  static boolean IS_RATIO = false;
+//    static boolean IS_RATIO = false;
 //    static boolean IS_CAVEMEN = false;
   static boolean IS_CAVEMEN = false;
-  //    static boolean IS_ONE_ON_ONE = true;
-  static boolean IS_ONE_ON_ONE = false;
+//    static boolean IS_ONE_ON_ONE = true;
+  static boolean IS_ONE_ON_ONE = true;
 
   //Global Parameters
-  static int N_OF_GROUP = 8;
-  static int N_IN_GROUP = 10;
+  static int N_OF_GROUP = 6;
+  static int N_IN_GROUP = 8;
   static int N = N_OF_GROUP * N_IN_GROUP;
-  static int M = 100;
+  static int M = 80;
   static int S = 5;
-  static int TIME = 1000 + 1;
+  static int TIME = 2000 + 1;
 
   //Moving Params
-  static double[] BETA = {0};
-  //    static double[] BETA = {0, .08, 1};
+//  static double[] BETA = {0};
+//    static double[] BETA = {0, .08, 1};
+  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
 //    static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
 
+//  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static double[] P_SHARING = new double[]{0, .125, .25, .375, .5, .625, .75, .875, 1};
-  //    static double[] P_SHARING = new double[]{0, .08, 1};
+//    static double[] P_SHARING = new double[]{0, .08, 1};
 //    static double[] P_SHARING = new double[]{0, .5, 1};
 //    static double[] P_SHARING = new double[]{0, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;

@@ -5,7 +5,7 @@ import java.io.File;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 10_000;
+  static int ITERATION = 5000;
   static final long TIC = System.currentTimeMillis();
 
   //Output Setup
@@ -13,33 +13,34 @@ public class Main {
   static final boolean GET_MAT = true;
 
   //Key Assumptions
-  static boolean IS_CAVEMEN = false;
+  static boolean IS_CAVEMEN = true;
   static boolean IS_LEARNING_COSTLY = false;
   static boolean IS_LEARNING_GREEDY = false;
 
   //Global Parameters
-  static int N_OF_GROUP = 5;
-  static int N_IN_GROUP = 8;
+  static int N_OF_GROUP = 8;
+  static int N_IN_GROUP = 10;
   static int N = N_OF_GROUP * N_IN_GROUP;
-  static int M = 50;
+  static int M = 100;
   static int S = 5;
-  static int TIME = 2000 + 1;
+  static int TIME = 500 + 1;
 
   //Moving Params
-  static double[] BETA = {0};
+//  static double[] BETA = {0};
 //  static double[] BETA = {0, .08, 1};
 //  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
-//  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static int LENGTH_BETA = BETA.length;
 
   static double[] EPSILON = new double[]{0};
 //  static double[] EPSILON = new double[]{0, .15, .3, .45};
   static int LENGTH_EPSILON = EPSILON.length;
 
-  static double[] P_SHARING = new double[]{.1, .5, .9};
+  static double[] P_SHARING = new double[]{.1, .25, .5, .75, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
-  static double[] P_SEEKING = new double[]{.1, .5, .9};
+//  static double[] P_SEEKING = new double[]{1};
+  static double[] P_SEEKING = new double[]{.1, .25, .5, .75, 1};
   static int LENGTH_P_SEEKING = P_SEEKING.length;
 
   static double P_LEARNING = .2;
