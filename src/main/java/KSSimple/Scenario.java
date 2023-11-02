@@ -1,7 +1,6 @@
 package KSSimple;
 
 import static org.apache.commons.math3.util.FastMath.max;
-
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -53,10 +52,6 @@ public class Scenario {
   double knowledgeAvg;
 
   double centralization;
-
-  double[] typeKnowledgeAvg;
-  double[] typeContribution;
-  double[] typeContributionPositive;
 
   Scenario(double beta, double pSharing) {
     this.beta = beta;
@@ -325,9 +320,6 @@ public class Scenario {
     setBeliefSourceDiversity();
     setContribution();
     setCentralization();
-    if (Main.IS_RATIO) {
-      setTypeOutcome();
-    }
   }
 
   void setBestRankKnowledge() {
@@ -417,39 +409,6 @@ public class Scenario {
     }
 
     centralization /= (double) Main.N; // Theoretical maximum of Sum[Cx(p*)-Cx(pi)] over 1:N
-  }
-
-  void setTypeOutcome() {
-    typeKnowledgeAvg = new double[2];
-    typeContribution = new double[4];
-    typeContributionPositive = new double[4];
-    int[] nType2Type = new int[4]; // Very inefficient
-    for (int focal : focalIndexArray) {
-      int typeOfFocal = (pSharingOf[focal] < .5) ? 0 : 1;
-      typeKnowledgeAvg[typeOfFocal] += knowledge[focal];
-      for (int target : targetIndexArray) {
-        if (focal == target) {
-          continue;
-        }
-        int typeOfTarget = (pSharingOf[target] < .5) ? 0 : 1;
-        int type2Type = typeOfFocal * 2 + typeOfTarget;
-        nType2Type[type2Type]++;
-        for (int m : mIndexArray) {
-          if (beliefSource[target][m] == focal) {
-            typeContribution[type2Type]++;
-            if (belief[target][m] == reality[m]) {
-              typeContributionPositive[type2Type]++;
-            }
-          }
-        }
-      }
-    }
-    typeKnowledgeAvg[0] /= (double) max(nSeeker, 1) * (double) Main.M;
-    typeKnowledgeAvg[1] /= (double) max(nSharer, 1) * (double) Main.M;
-    for (int t2t = 0; t2t < 4; t2t++) {
-      typeContribution[t2t] /= (double) nType2Type[t2t] * (double) Main.M;
-      typeContributionPositive[t2t] /= (double) nType2Type[t2t] * (double) Main.M;
-    }
   }
 
   void shuffleFisherYates(int[] nArray) {

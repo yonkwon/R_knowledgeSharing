@@ -57,8 +57,6 @@ public class NetworkCSV {
       csvWriter.append(",");
       csvWriter.append("SOURCE_INIT_KNOWLEDGE");
       csvWriter.append(",");
-      csvWriter.append("SOURCE_INIT_RANK");
-      csvWriter.append(",");
       csvWriter.append("SOURCE_CONTRIBUTION");
       csvWriter.append(",");
       csvWriter.append("SOURCE_CONTRIBUTION_UPOS");
@@ -93,9 +91,6 @@ public class NetworkCSV {
           csvWriter.append(",");
 //                    csvWriter.append("SOURCE_INIT_KNOWLEDGE");
           csvWriter.append(Double.toString(sc.knowledge0[focal] / (double) Main.M));
-          csvWriter.append(",");
-//                    csvWriter.append("SOURCE_INIT_RANK");
-          csvWriter.append(Integer.toString(sc.rank0[focal]));
           csvWriter.append(",");
 //                    csvWriter.append("SOURCE_CONTRIBUTION");
           csvWriter.append(Double.toString(sc.contribution[focal]));

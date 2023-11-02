@@ -25,13 +25,6 @@ class MatWriter {
     Matrix beliefSourceDiversitySTD = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix centralizationAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix centralizationSTD = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    
-    Matrix typeKnowledgeAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_TYPE);
-    Matrix typeKnowledgeSTD = Mat5.newMatrix(Main.RESULT_KEY_VALUE_TYPE);
-    Matrix typeContributionAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_TYPE_TO_TYPE);
-    Matrix typeContributionSTD = Mat5.newMatrix(Main.RESULT_KEY_VALUE_TYPE_TO_TYPE);
-    Matrix typeContributionPositiveAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_TYPE_TO_TYPE);
-    Matrix typeContributionPositiveSTD = Mat5.newMatrix(Main.RESULT_KEY_VALUE_TYPE_TO_TYPE);
 
     for (int b = 0; b < Main.LENGTH_BETA; b++) {
       for (int ps = 0; ps < Main.LENGTH_P_SHARING; ps++) {
@@ -51,23 +44,6 @@ class MatWriter {
           beliefSourceDiversitySTD.setDouble(indices, c.beliefSourceDiversitySTD[b][ps][t]);
           centralizationAVG.setDouble(indices, c.centralizationAVG[b][ps][t]);
           centralizationSTD.setDouble(indices, c.centralizationSTD[b][ps][t]);
-
-          if( Main.IS_RATIO ){
-            for( int type = 0; type < 2; type ++ ){
-              int[] indicesType = {b, ps, t, type};
-              typeKnowledgeAVG.setDouble(indicesType, c.typeKnowledgeAVG[b][ps][t][type]);
-              typeKnowledgeSTD.setDouble(indicesType, c.typeKnowledgeSTD[b][ps][t][type]);
-            }
-
-            for( int type2Type = 0; type2Type < 4; type2Type ++ ){
-              int[] indicesType2Type = {b, ps, t, type2Type};
-              typeContributionAVG.setDouble(indicesType2Type, c.typeContributionAVG[b][ps][t][type2Type]);
-              typeContributionSTD.setDouble(indicesType2Type, c.typeContributionSTD[b][ps][t][type2Type]);
-              typeContributionPositiveAVG.setDouble(indicesType2Type, c.typeContributionPositiveAVG[b][ps][t][type2Type]);
-              typeContributionPositiveSTD.setDouble(indicesType2Type, c.typeContributionPositiveSTD[b][ps][t][type2Type]);
-            }
-          }
-
         }
       }
     }
@@ -115,17 +91,6 @@ class MatWriter {
           .addArray("r_cent_avg", centralizationAVG)
           .addArray("r_cent_std", centralizationSTD)
       ;
-
-      if( Main.IS_RATIO ){
-        mat5File
-          .addArray("r_t_know_avg", typeKnowledgeAVG)
-          .addArray("r_t_know_std", typeKnowledgeSTD)
-          .addArray("r_t_cont_avg", typeContributionAVG)
-          .addArray("r_t_cont_std", typeContributionSTD)
-          .addArray("r_t_conp_avg", typeContributionPositiveAVG)
-          .addArray("r_t_conp_std", typeContributionPositiveSTD)
-        ;
-      }
 
       mat5File
         .addArray("perf_seconds", Mat5.newScalar((System.currentTimeMillis() - Main.TIC)/1000))

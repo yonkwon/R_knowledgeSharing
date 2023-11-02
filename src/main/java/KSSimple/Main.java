@@ -5,7 +5,7 @@ import java.io.File;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 5000;
+  static int ITERATION = 1000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
@@ -15,7 +15,7 @@ public class Main {
 
   //Key Assumptions
   static boolean IS_RATIO = false;
-  static boolean IS_CAVEMEN = false;
+  static boolean IS_CAVEMEN = true;
   static boolean IS_ONE_ON_ONE = false;
 
   //Global Parameters
@@ -24,7 +24,7 @@ public class Main {
   static int N = N_OF_GROUP * N_IN_GROUP;
   static int M = 100;
   static int S = 5;
-  static int TIME = 300 + 1;
+  static int TIME = 1000 + 1;
 
   //Moving Params
 //  static double[] BETA = {0};
@@ -45,14 +45,6 @@ public class Main {
 
   static final int[] RESULT_KEY_VALUE = {
       LENGTH_BETA, LENGTH_P_SHARING, TIME
-  };
-
-  static final int[] RESULT_KEY_VALUE_TYPE = {
-      LENGTH_BETA, LENGTH_P_SHARING, TIME, 2
-  };
-
-  static final int[] RESULT_KEY_VALUE_TYPE_TO_TYPE = {
-      LENGTH_BETA, LENGTH_P_SHARING, TIME, 4
   };
 
   static String LABEL = "KSSimple";
