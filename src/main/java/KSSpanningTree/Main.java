@@ -1,4 +1,4 @@
-package KSSimple;
+package KSSpanningTree;
 
 import java.io.File;
 
@@ -15,8 +15,8 @@ public class Main {
 
   //Key Assumptions
   static boolean IS_RATIO = false;
-  static boolean IS_CAVEMEN = true;
-  static boolean IS_ONE_ON_ONE = true;
+  static boolean IS_CAVEMEN = false;
+  static boolean IS_ONE_ON_ONE = false;
 
   //Global Parameters
   static int N_OF_GROUP = 8;
@@ -47,7 +47,7 @@ public class Main {
       LENGTH_BETA, LENGTH_P_SHARING, TIME
   };
 
-  static String LABEL = "KSSimple";
+  static String LABEL = "KSTree";
   static String PARAMS =
       "[r"
           + (IS_RATIO ? 1 : 0)

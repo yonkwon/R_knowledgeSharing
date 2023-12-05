@@ -48,7 +48,7 @@ ci_multiplier <- as.numeric(qnorm(ci_alpha) / sqrt(data$para.iteration))
 ```{r fig2}
 set_fig2_beta <- 1
 set_fig2_p.s <- 1:data$para.l.p.s
-set_fig2_p.s <- c(1, 5, 9)
+set_fig2_p.s <- c(1, 6, 11)
 set_fig2_time_limit <- data$para.time
 set_fig2_time <- 1:set_fig2_time_limit
 
@@ -111,7 +111,7 @@ ggsave(
 ```{r fig3}
 set_fig3_beta <- 1:data$para.l.b
 # set_fig3_p.s <- 1:data$para.l.p.s
-set_fig3_p.s <- c(1, 5, 9)
+set_fig3_p.s <- c(1, 6, 11)
 set_fig3_time <- data$para.time
 
 set_fig3_outcome <- data$r.know.avg[set_fig3_beta, , set_fig3_time]
