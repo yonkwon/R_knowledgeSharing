@@ -73,6 +73,7 @@ class MatWriter {
           .addArray("para_n_of", Mat5.newScalar(Main.N_OF_GROUP))
           .addArray("para_m", Mat5.newScalar(Main.M))
           .addArray("para_s", Mat5.newScalar(Main.S))
+          .addArray("para_p_a", Mat5.newScalar(Main.P_ACCEPT))
           .addArray("para_p_l", Mat5.newScalar(Main.P_LEARNING))
 
           .addArray("para_l_b", Mat5.newScalar(Main.LENGTH_BETA))
