@@ -38,6 +38,7 @@ public class Main {
 
   static int LENGTH_P_SHARING = P_SHARING.length;
 
+  static double P_ACCEPT = .8;
   static double P_LEARNING = .2;
 
   //Instrumental Params
@@ -69,6 +70,8 @@ public class Main {
           + ")"
           + "Pl"
           + P_LEARNING
+          + "Pa"
+          + P_ACCEPT
           + "B"
           + LENGTH_BETA
           + "Pg"

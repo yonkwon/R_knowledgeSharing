@@ -321,7 +321,9 @@ public class Scenario {
             isBusy[focal] = true;
             isBusy[target] = true;
             for (int m : mIndexArray) {
-              if (r.nextDouble() < Main.P_LEARNING && belief[target][m] != belief[focal][m]) { //@220627Fix: Added belief!=belief
+              if (r.nextDouble() < Main.P_ACCEPT &&
+                  r.nextDouble() < Main.P_LEARNING &&
+                  belief[target][m] != belief[focal][m]) { //@220627Fix: Added belief!=belief
                 belief[target][m] = belief[focal][m];
                 beliefSourceCount[target][beliefSource[target][m]]--;
                 beliefSource[target][m] = beliefSource[focal][m];
@@ -341,7 +343,9 @@ public class Scenario {
             isBusy[focal] = true;
             isBusy[target] = true;
             for (int m : mIndexArray) {
-              if (r.nextDouble() < Main.P_LEARNING && belief[target][m] != belief[focal][m]) { //@220627Fix: Added belief!=belief
+              if (r.nextDouble() < Main.P_ACCEPT &&
+                  r.nextDouble() < Main.P_LEARNING &&
+                  belief[target][m] != belief[focal][m]) { //@220627Fix: Added belief!=belief
                 belief[focal][m] = belief[target][m];
                 beliefSourceCount[focal][beliefSource[focal][m]]--;
                 beliefSource[focal][m] = beliefSource[target][m];
