@@ -1,6 +1,6 @@
-package KSSpanningTree;
-
+package KSVarietyPack;
 import java.io.File;
+import java.util.HashMap;
 
 public class Main {
 
@@ -15,16 +15,23 @@ public class Main {
 
   //Key Assumptions
   static boolean IS_RATIO = false;
-  static boolean IS_CAVEMEN = false;
   static boolean IS_ONE_ON_ONE = false;
 
   //Global Parameters
-  static int N_OF_GROUP = 8;
-  static int N_IN_GROUP = 10;
-  static int N = N_OF_GROUP * N_IN_GROUP;
   static int M = 100;
   static int S = 5;
   static int TIME = 2000 + 1;
+
+  //Network Parameters
+  static HashMap<Integer,String> NETWORK_TYPE = new HashMap<Integer,String>(){{
+    put(0, "Random Spanning Tree");
+    put(1, "Connected Cavemen");
+    put(2, "Preferential Attachment");
+  }};
+  static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
+  static int N_OF_GROUP = 8;
+  static int N_IN_GROUP = 10;
+  static int N = N_OF_GROUP * N_IN_GROUP;
 
   //Moving Params
 //  static double[] BETA = {0};
@@ -48,12 +55,10 @@ public class Main {
       LENGTH_BETA, LENGTH_P_SHARING, TIME
   };
 
-  static String LABEL = "KSTree";
+  static String LABEL = "KSVariety";
   static String PARAMS =
       "[r"
           + (IS_RATIO ? 1 : 0)
-          + "c"
-          + (IS_CAVEMEN ? 1 : 0)
           + "o"
           + (IS_ONE_ON_ONE ? 1 : 0)
           + "]"
