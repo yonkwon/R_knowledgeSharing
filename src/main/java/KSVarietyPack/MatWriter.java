@@ -33,7 +33,7 @@ class MatWriter {
       for (int b = 0; b < Main.LENGTH_BETA; b++) {
         for (int ps = 0; ps < Main.LENGTH_P_SHARING; ps++) {
           for (int t = 0; t < Main.TIME; t++) {
-            int[] indices = {b, ps, t};
+            int[] indices = {nt, b, ps, t};
             knowledgeAVG.setDouble(indices, c.knowledgeAVG[nt][b][ps][t]);
             knowledgeSTD.setDouble(indices, c.knowledgeSTD[nt][b][ps][t]);
             knowledgeBestAVG.setDouble(indices, c.knowledgeBestAVG[nt][b][ps][t]);

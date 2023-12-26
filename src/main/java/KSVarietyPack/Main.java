@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 5_000;
+  static int ITERATION = 2_000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
@@ -52,7 +52,7 @@ public class Main {
   static double M_N = M * N;
 
   static final int[] RESULT_KEY_VALUE = {
-      LENGTH_BETA, LENGTH_P_SHARING, TIME
+      LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
   };
 
   static String LABEL = "KSVariety";
