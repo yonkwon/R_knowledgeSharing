@@ -5,13 +5,13 @@ import java.util.HashMap;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 2_000;
+  static int ITERATION = 1_000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
   //Output Setup
-  static final boolean GET_CSV = false;
-  static final boolean GET_MAT = true;
+  static final boolean GET_CSV = true;
+  static final boolean GET_MAT = false;
 
   //Key Assumptions
   static boolean IS_RATIO = false;
@@ -20,7 +20,7 @@ public class Main {
   //Global Parameters
   static int M = 100;
   static int S = 5;
-  static int TIME = 2000 + 1;
+  static int TIME = 1500 + 1;
 
   //Network Parameters
   static HashMap<Integer,String> NETWORK_TYPE = new HashMap<Integer,String>(){{
@@ -55,7 +55,7 @@ public class Main {
       LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
   };
 
-  static String LABEL = "KSVariety";
+  static String RUN_ID = "KSVariety";
   static String PARAMS =
       "[r"
           + (IS_RATIO ? 1 : 0)
@@ -82,17 +82,19 @@ public class Main {
           + "Pg"
           + LENGTH_P_SHARING;
 
-  static String PATH_CSV = new File(".").getAbsolutePath() + "\\" + LABEL + PARAMS + "\\";
+  static String PATH_CSV = new File(".").getAbsolutePath() + "\\" + RUN_ID + PARAMS + "\\";
 
   public static void main(String[] args) {
+    Computation c = new Computation();
     if (GET_CSV) {
-      new NetworkCSV();
+      System.out.println(PATH_CSV);
+      c.printNetwork();
     }
     if (GET_MAT) {
-      System.out.println(LABEL + ":\t" + PARAMS);
-      Computation c = new Computation();
+      System.out.println(RUN_ID + ":\t" + PARAMS);
+      c.doExperiment();
       new MatWriter(c);
-      System.out.println(LABEL + ":\t" + PARAMS);
+      System.out.println(RUN_ID + ":\t" + PARAMS);
     }
   }
 

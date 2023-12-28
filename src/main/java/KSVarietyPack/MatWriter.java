@@ -103,7 +103,7 @@ class MatWriter {
           .addArray("r_effi_avg", efficiencyAVG)
           .addArray("r_effi_std", efficiencySTD)
           .addArray("perf_seconds", Mat5.newScalar((System.currentTimeMillis() - Main.TIC) / 1000))
-          .writeTo(Sinks.newStreamingFile(new File(Main.LABEL + Main.PARAMS + ".mat")));
+          .writeTo(Sinks.newStreamingFile(new File(Main.RUN_ID + Main.PARAMS + ".mat")));
       System.out.println("File Printed");
     } catch (IOException e) {
       e.printStackTrace();
