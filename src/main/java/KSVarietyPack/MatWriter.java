@@ -86,6 +86,8 @@ class MatWriter {
           .addArray("para_l_net_type", Mat5.newScalar(Main.LENGTH_NETWORK_TYPE))
           .addArray("para_a_net_type", matrixArrayNetworkType)
 
+          .addArray("para_tau", Mat5.newScalar(Main.TAU))
+
           .addArray("r_know_avg", knowledgeAVG)
           .addArray("r_know_std", knowledgeSTD)
           .addArray("r_kbst_avg", knowledgeBestAVG)

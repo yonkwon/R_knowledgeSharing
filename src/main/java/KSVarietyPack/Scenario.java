@@ -2,6 +2,7 @@ package KSVarietyPack;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
@@ -44,12 +45,12 @@ public class Scenario {
   int knowledgeWorst;
   double knowledgeBestSourceDiversity;
   double knowledgeMinMax;
-  double[] contribution;
-  double[] applicationRate;
-  double[] applicationRatePositive;
-  double[] applicationRateNegative;
+  double[] contributionOf;
+  double[] contributionOfPositive;
+  double[] contributionOfNegative;
 
   boolean[][] network;
+  int[] degree;
   int[] isInGroup;
 
   double knowledgeAvg;
@@ -163,31 +164,34 @@ public class Scenario {
 
   void initializeNetwork() {
     network = new boolean[Main.N][Main.N];
-    int[] degree = new int[Main.N];
+    degree = new int[Main.N];
     double[][] shortestDistance;
+    boolean[] isPresent;
     efficiency = 0;
-
     isInGroup = new int[Main.N];
-
     switch (networkType) {
       case 0:
         // Random spanning tree
-        int start = r.nextInt(Main.N);
-        boolean[] connected = new boolean[Main.N];
-        connected[start] = true;
+        isPresent = new boolean[Main.N];
         shuffleFisherYates(focalIndexArray);
+        isPresent[focalIndexArray[0]] = true;
+        isPresent[focalIndexArray[1]] = true;
+        network[focalIndexArray[0]][focalIndexArray[1]] = true;
+        network[focalIndexArray[1]][focalIndexArray[0]] = true;
+        degree[focalIndexArray[0]] ++;
+        degree[focalIndexArray[1]] ++;
         for (int focal : focalIndexArray) {
-          isInGroup[focal] = 0;
-          if (connected[focal]) {
+          if (isPresent[focal]) {
             continue;
           }
           shuffleFisherYates(targetIndexArray);
-          for (int target : targetIndexArray) {
-            if (connected[target]) {
-              network[focal][target] = true;
-              network[target][focal] = true;
+          for (int target2Link : targetIndexArray) {
+            if (isPresent[target2Link]) {
+              isPresent[focal] = true;
+              network[focal][target2Link] = true;
+              network[target2Link][focal] = true;
               degree[focal]++;
-              degree[target]++;
+              degree[target2Link]++;
               break;
             }
           }
@@ -259,47 +263,40 @@ public class Scenario {
         }
         break;
       case 2: // Scale free variant
-        boolean[] isFilled = new boolean[Main.N];
+        isPresent = new boolean[Main.N];
         double[] gravity;
         //Starting lattice
-        for (int fill = 0; fill < Main.N; fill += Main.N_IN_GROUP) {
-          int prev = (Main.N + fill - Main.N_IN_GROUP) % Main.N;
-          int next = (fill + Main.N_IN_GROUP) % Main.N;
-          isFilled[fill] = true;
-          isFilled[prev] = true; // Intended inefficiency to avoid logical error
-          isFilled[next] = true;
-          degree[fill]++;
-          degree[prev]++;
-          degree[next]++;
-          network[fill][prev] = true;
-          network[prev][fill] = true;
-          network[fill][next] = true;
-          network[next][fill] = true;
+        for (int focal = 0; focal < Main.N; focal += Main.N_IN_GROUP) {
+          int next = (focal + Main.N_IN_GROUP) % Main.N;
+          isPresent[focal] = true;
+          isPresent[next] = true;
+          network[focal][next] = true;
+          network[next][focal] = true;
+          degree[focal] = 2;
         }
         //Invite one by one, randomly
         shuffleFisherYates(focalIndexArray);
         for (int focal : focalIndexArray) {
-          if (isFilled[focal]) {
+          if (isPresent[focal]) {
             continue;
           } else {
-            isFilled[focal] = true;
+            isPresent[focal] = true;
           }
           gravity = new double[Main.N];
           double gravitySum = 0;
           for (int target : targetIndexArray) {
-            if (isFilled[target] || focal == target) {
-              double distance = FastMath.min(
-                  Main.N - FastMath.abs(focal - target),
-                  focal - target
-              );
-              gravity[target] = FastMath.pow(degree[target], beta) * FastMath.pow(distance, 1D - beta);
+            if (isPresent[target] && focal != target) {
+              double absoluteDistance = FastMath.abs(focal - target);
+              double distance = FastMath.min(absoluteDistance, Main.N - absoluteDistance);
+              gravity[target] = FastMath.pow(degree[target], beta*Main.TAU) * FastMath.pow(distance, -Main.TAU*(1D - beta));
               gravitySum += gravity[target];
             }
           }
-          for (int z = 0; z < Main.N_IN_GROUP - 1; z++) {
+          for (int z = 1; z < Main.N_IN_GROUP; z++) {
             double marker = r.nextDouble();
             double accumulatedProbability = 0;
             for (int target : targetIndexArray) { //@@ Is this correct?
+              if( !isPresent[focal] || focal == target ) { continue; }
               accumulatedProbability += gravity[target] / gravitySum;
               if (marker < accumulatedProbability) {
                 network[focal][target] = true;
@@ -515,18 +512,24 @@ public class Scenario {
   }
 
   void setContribution() {
-    contribution = new double[Main.N];
-    applicationRate = new double[Main.N];
-    applicationRatePositive = new double[Main.N];
-    applicationRateNegative = new double[Main.N];
+    contributionOf = new double[Main.N];
+    contributionOfPositive = new double[Main.N];
+    contributionOfNegative = new double[Main.N];
     for (int focal : focalIndexArray) {
       for (int m : mIndexArray) {
         int source = beliefSource[focal][m];
-        contribution[source]++;
+        contributionOf[source]++;
+        if( reality[m] == belief[focal][m] ){
+          contributionOfPositive[source] ++;
+        }else{
+          contributionOfNegative[source] ++;
+        }
       }
     }
     for (int focal : focalIndexArray) {
-      contribution[focal] /= Main.M_N;
+      contributionOf[focal] /= Main.M_N;
+      contributionOfPositive[focal] /= Main.M_N;
+      contributionOfNegative[focal] /= Main.M_N;
     }
   }
 
@@ -582,13 +585,15 @@ public class Scenario {
       csvWriter.append(",");
       csvWriter.append("SOURCE_CONTRIBUTION");
       csvWriter.append(",");
-      csvWriter.append("SOURCE_CONTRIBUTION_UPOS");
+      csvWriter.append("SOURCE_CONTRIBUTION_POS");
       csvWriter.append(",");
-      csvWriter.append("SOURCE_CONTRIBUTION_UNEG");
+      csvWriter.append("SOURCE_CONTRIBUTION_NEG");
       csvWriter.append(",");
       csvWriter.append("IS_CONNECTED");
       csvWriter.append(",");
-      csvWriter.append("WEIGHT");
+      csvWriter.append("SOURCE_DEGREE");
+      csvWriter.append(",");
+      csvWriter.append("CONTRIBUTION");
       csvWriter.append("\n");
 
       //Edge
@@ -616,18 +621,21 @@ public class Scenario {
           csvWriter.append(Double.toString(this.knowledge0[focal] / (double) Main.M));
           csvWriter.append(",");
 //                    csvWriter.append("SOURCE_CONTRIBUTION");
-          csvWriter.append(Double.toString(this.contribution[focal]));
+          csvWriter.append(Double.toString(this.contributionOf[focal]));
           csvWriter.append(",");
-//                    csvWriter.append("SOURCE_CONTRIBUTION_UPOS");
-          csvWriter.append(Double.toString(this.applicationRatePositive[focal]));
+//                    csvWriter.append("SOURCE_CONTRIBUTION_POS");
+          csvWriter.append(Double.toString(this.contributionOfPositive[focal]));
           csvWriter.append(",");
-//                    csvWriter.append("SOURCE_CONTRIBUTION_UNEG");
-          csvWriter.append(Double.toString(this.applicationRateNegative[focal]));
+//                    csvWriter.append("SOURCE_CONTRIBUTION_NEG");
+          csvWriter.append(Double.toString(this.contributionOfNegative[focal]));
           csvWriter.append(",");
 //                    csvWriter.append("IS_CONNECTED");
           csvWriter.append(Integer.toString(this.network[focal][target] ? 1 : 0));
           csvWriter.append(",");
-//                    csvWriter.append("WEIGHT");
+//                    csvWriter.append("SOURCE_DEGREE");
+          csvWriter.append(Integer.toString(this.degree[focal]));
+          csvWriter.append(",");
+//                    csvWriter.append("CONTRIBUTION");
           csvWriter.append(Double.toString(this.beliefSourceCount[target][focal] / (double) Main.M)); // Changed 221002 [focal][target] to [target][focal]
           csvWriter.append("\n");
         }
