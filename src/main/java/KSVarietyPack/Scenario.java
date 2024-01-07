@@ -2,7 +2,6 @@ package KSVarietyPack;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
@@ -11,6 +10,7 @@ import org.apache.commons.math3.util.FastMath;
 public class Scenario {
 
   RandomGenerator r;
+  boolean isNotConverged = false;
 
   int[] focalIndexArray;
   int[] targetIndexArray;
@@ -51,7 +51,7 @@ public class Scenario {
 
   boolean[][] network;
   int[] degree;
-  int[] isInGroup;
+  int[] groupOf;
 
   double knowledgeAvg;
 
@@ -168,7 +168,7 @@ public class Scenario {
     double[][] shortestDistance;
     boolean[] isPresent;
     efficiency = 0;
-    isInGroup = new int[Main.N];
+    groupOf = new int[Main.N];
     switch (networkType) {
       case 0:
         // Random spanning tree
@@ -216,7 +216,8 @@ public class Scenario {
         for (int group = 0; group < Main.N_OF_GROUP; group++) {
           for (int focalInGroup = 0; focalInGroup < Main.N_IN_GROUP; focalInGroup++) {
             int focal = group * Main.N_IN_GROUP + focalInGroup;
-            isInGroup[focal] = group;
+            groupOf[focal] = group;
+            degree[focal] = Main.N_IN_GROUP-1;
             for (int targetInGroup = 0; targetInGroup < Main.N_IN_GROUP; targetInGroup++) {
               int target = group * Main.N_IN_GROUP + targetInGroup;
               if (focal == target) {
@@ -224,8 +225,6 @@ public class Scenario {
               }
               network[focal][target] = true;
               network[target][focal] = true;
-              degree[focal]++;
-              degree[target]++;
             }
           }
         }
@@ -242,13 +241,16 @@ public class Scenario {
         //Rewiring
         shuffleFisherYates(focalIndexArray);
         for (int focal : focalIndexArray) {
-          int focalGroup = isInGroup[focal];
+          int focalGroup = groupOf[focal];
           int inUnitLast = (focalGroup + 1) * Main.N_IN_GROUP;
           for (int targetInUnit = focalGroup * Main.N_IN_GROUP; targetInUnit < inUnitLast; targetInUnit++) {
-            if (network[focal][targetInUnit] && degree[targetInUnit] > 1 && r.nextDouble() < beta) {
+            if (network[focal][targetInUnit] &&
+                degree[targetInUnit] > 1 &&
+                r.nextDouble() < beta) {
               shuffleFisherYates(targetIndexArray);
               for (int targetOutUnit : targetIndexArray) {
-                if (!network[focal][targetOutUnit] && focalGroup != isInGroup[targetOutUnit]) {
+                if (!network[focal][targetOutUnit] &&
+                    focalGroup != groupOf[targetOutUnit]) {
                   network[focal][targetInUnit] = false;
                   network[targetInUnit][focal] = false;
                   network[focal][targetOutUnit] = true;
@@ -354,17 +356,19 @@ public class Scenario {
       }
     }
     efficiency /= Main.N * (Main.N - 1D) / 2D;
-
   }
 
 
   void stepForward() {
-    doLearning();
-    setOutcome();
+    if( isNotConverged ){
+      doLearning();
+      setOutcome();
+    }
   }
 
   void doLearning() {
     boolean[] isBusy = new boolean[Main.N];
+    isNotConverged = false;
     shuffleFisherYates(focalIndexArray);
     for (int focal : focalIndexArray) {
       if (isOneOnOne &&
@@ -385,12 +389,14 @@ public class Scenario {
             isBusy[focal] = true;
             isBusy[target] = true;
             for (int m : mIndexArray) {
-              if (r.nextDouble() < Main.P_LEARNING &&
-                  belief[target][m] != belief[focal][m]) { //@220627Fix: Added belief!=belief
-                belief[target][m] = belief[focal][m];
-                beliefSourceCount[target][beliefSource[target][m]]--;
-                beliefSource[target][m] = beliefSource[focal][m];
-                beliefSourceCount[target][beliefSource[target][m]]++; // Not necessarily focal
+              if (belief[target][m] != belief[focal][m]) {
+                isNotConverged = true;
+                if (r.nextDouble() < Main.P_LEARNING) {
+                  belief[target][m] = belief[focal][m];
+                  beliefSourceCount[target][beliefSource[target][m]]--;
+                  beliefSource[target][m] = beliefSource[focal][m];
+                  beliefSourceCount[target][beliefSource[target][m]]++; // Not necessarily focal
+                }
               }
             }
             knowledge[target] = getKnowledgeOf(target);
@@ -409,12 +415,14 @@ public class Scenario {
             isBusy[focal] = true;
             isBusy[target] = true;
             for (int m : mIndexArray) {
-              if (r.nextDouble() < Main.P_LEARNING &&
-                  belief[target][m] != belief[focal][m]) { //@220627Fix: Added belief!=belief
-                belief[focal][m] = belief[target][m];
-                beliefSourceCount[focal][beliefSource[focal][m]]--;
-                beliefSource[focal][m] = beliefSource[target][m];
-                beliefSourceCount[focal][beliefSource[focal][m]]++;
+              if (belief[target][m] != belief[focal][m]) {
+                isNotConverged = true;
+                if (r.nextDouble() < Main.P_LEARNING) {
+                  belief[focal][m] = belief[target][m];
+                  beliefSourceCount[focal][beliefSource[focal][m]]--;
+                  beliefSource[focal][m] = beliefSource[target][m];
+                  beliefSourceCount[focal][beliefSource[focal][m]]++;
+                }
               }
             }
             knowledge[focal] = getKnowledgeOf(focal);
@@ -615,7 +623,7 @@ public class Scenario {
           csvWriter.append(Double.toString(this.pSharingOf[target]));
           csvWriter.append(",");
 //                    csvWriter.append("SOURCE_UNIT");
-          csvWriter.append(Integer.toString(this.isInGroup[focal]));
+          csvWriter.append(Integer.toString(this.groupOf[focal]));
           csvWriter.append(",");
 //                    csvWriter.append("SOURCE_INIT_KNOWLEDGE");
           csvWriter.append(Double.toString(this.knowledge0[focal] / (double) Main.M));

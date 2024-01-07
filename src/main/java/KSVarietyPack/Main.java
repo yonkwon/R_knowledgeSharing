@@ -5,22 +5,23 @@ import java.util.HashMap;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 2_000;
+  static int ITERATION = 10_000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
   //Output Setup
-  static final boolean GET_CSV = true;
+  static final boolean GET_NET = true;
   static final boolean GET_MAT = true;
+  static final boolean GET_LINE = true;
 
   //Key Assumptions
   static boolean IS_RATIO = false;
   static boolean IS_ONE_ON_ONE = false;
 
   //Global Parameters
-  static int M = 100;
+  static int M = 50;
   static int S = 5;
-  static int TIME = 1500 + 1;
+  static int TIME = 750 + 1;
 
   //Network Parameters
   static HashMap<Integer,String> NETWORK_TYPE = new HashMap<Integer,String>(){{
@@ -29,7 +30,7 @@ public class Main {
     put(2, "Preferential Attachment");
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
-  static int N_OF_GROUP = 8;
+  static int N_OF_GROUP = 6;
   static int N_IN_GROUP = 10;
   static int N = N_OF_GROUP * N_IN_GROUP;
 
@@ -42,8 +43,8 @@ public class Main {
 
 //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
-  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-
+//  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
   static double P_ACCEPT = .8;
@@ -54,6 +55,10 @@ public class Main {
 
   static final int[] RESULT_KEY_VALUE = {
       LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
+  };
+
+  static final int[] RESULT_KEY_VALUE_OPTIMAL = {
+      LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME
   };
 
   static String RUN_ID = "KSVariety";
@@ -87,7 +92,7 @@ public class Main {
 
   public static void main(String[] args) {
     Computation c = new Computation();
-    if (GET_CSV) {
+    if (GET_NET) {
       System.out.println(PATH_CSV);
       c.printNetwork();
     }
