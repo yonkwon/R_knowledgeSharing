@@ -1,4 +1,5 @@
 package KSVarietyPack;
+
 import java.io.File;
 import java.util.HashMap;
 
@@ -19,18 +20,18 @@ public class Main {
   static boolean IS_ONE_ON_ONE = false;
 
   //Global Parameters
-  static int M = 50;
+  static int M = 100;
   static int S = 5;
-  static int TIME = 750 + 1;
+  static int TIME = 1500 + 1;
 
   //Network Parameters
-  static HashMap<Integer,String> NETWORK_TYPE = new HashMap<Integer,String>(){{
+  static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
     put(0, "Random Spanning Tree");
     put(1, "Connected Cavemen");
     put(2, "Preferential Attachment");
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
-  static int N_OF_GROUP = 6;
+  static int N_OF_GROUP = 8;
   static int N_IN_GROUP = 10;
   static int N = N_OF_GROUP * N_IN_GROUP;
 
@@ -41,7 +42,7 @@ public class Main {
   static int LENGTH_BETA = BETA.length;
   static double TAU = 3;  //Preferential attachement scaler
 
-//  static double[] P_SHARING = new double[]{0};
+  //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
 //  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};

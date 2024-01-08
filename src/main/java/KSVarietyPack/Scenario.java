@@ -10,7 +10,7 @@ import org.apache.commons.math3.util.FastMath;
 public class Scenario {
 
   RandomGenerator r;
-  boolean isNotConverged = false;
+  boolean isNotConverged = true;
 
   int[] focalIndexArray;
   int[] targetIndexArray;
