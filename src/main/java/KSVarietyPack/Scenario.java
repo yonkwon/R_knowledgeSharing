@@ -246,7 +246,7 @@ public class Scenario {
           for (int targetInUnit = focalGroup * Main.N_IN_GROUP; targetInUnit < inUnitLast; targetInUnit++) {
             if (network[focal][targetInUnit] &&
                 degree[targetInUnit] > 1 &&
-                r.nextDouble() < beta) {
+                r.nextDouble() < beta/Main.TAU ) {
               shuffleFisherYates(targetIndexArray);
               for (int targetOutUnit : targetIndexArray) {
                 if (!network[focal][targetOutUnit] &&

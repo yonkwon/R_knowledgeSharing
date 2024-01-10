@@ -13,7 +13,6 @@ public class Main {
   //Output Setup
   static final boolean GET_NET = true;
   static final boolean GET_MAT = true;
-  static final boolean GET_LINE = true;
 
   //Key Assumptions
   static boolean IS_RATIO = false;
@@ -22,7 +21,7 @@ public class Main {
   //Global Parameters
   static int M = 100;
   static int S = 5;
-  static int TIME = 1500 + 1;
+  static int TIME = 1000 + 1;
 
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -40,7 +39,7 @@ public class Main {
 //  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
-  static double TAU = 3;  //Preferential attachement scaler
+  static double TAU = 5;  //Preferential attachement scaler
 
   //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
