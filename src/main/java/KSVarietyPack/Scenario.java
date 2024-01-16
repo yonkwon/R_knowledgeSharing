@@ -324,7 +324,8 @@ public class Scenario {
             }
           }
         }
-        // old code below
+        break;
+      // old code below
         /*
         isPresent = new boolean[Main.N];
         double[] gravity;
@@ -389,7 +390,6 @@ public class Scenario {
           }
         }
         break;
-
          */
     }
     

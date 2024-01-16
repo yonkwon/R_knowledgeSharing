@@ -6,7 +6,7 @@ import java.util.HashMap;
 public class Main {
   
   //Computation Parameters
-  static int ITERATION = 5_000;
+  static int ITERATION = 1000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
   
@@ -39,8 +39,8 @@ public class Main {
 //  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
-  static double ALPHA = 4;  //Connected cavemen scaler
-  static double TAU = .25;  //Preferential attachement scaler
+  static double ALPHA = 2;  //Connected cavemen scaler
+  static double TAU = .5;  //Preferential attachement scaler
   
 //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
