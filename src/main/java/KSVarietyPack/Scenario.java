@@ -7,7 +7,6 @@ import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
-
 public class Scenario {
   
   RandomGenerator r;
@@ -49,6 +48,11 @@ public class Scenario {
   double[] contributionOf;
   double[] contributionOfPositive;
   double[] contributionOfNegative;
+  int[] rank;
+  int[] rankKnowledge;
+  double[] rankContribution;
+  double[] rankContributionPositive;
+  double[] rankContributionNegative;
   
   boolean[][] network;
   int[] degree;
@@ -247,7 +251,7 @@ public class Scenario {
           for (int targetInUnit = focalGroup * Main.N_IN_GROUP; targetInUnit < inUnitLast; targetInUnit++) {
             if (network[focal][targetInUnit] &&
                 degree[targetInUnit] > 1 &&
-                r.nextDouble() < beta / Main.ALPHA) {
+                r.nextDouble() < beta / Main.GAMMA) {
               shuffleFisherYates(targetIndexArray);
               for (int targetOutUnit : targetIndexArray) {
                 if (!network[focal][targetOutUnit] &&
@@ -440,6 +444,7 @@ public class Scenario {
   void stepForward() {
     if (isNotConverged) {
       doLearning();
+      setRank();
       setOutcome();
     }
   }
@@ -540,6 +545,28 @@ public class Scenario {
     return 1D - (beliefSourceDiversity / (double) (Main.M * Main.M));
   }
   
+    void setRank() {
+    rank = new int[Main.N];
+    rankKnowledge = new int[Main.N];
+    for (int focal : focalIndexArray) {
+      int knowledgeCumFocal = knowledgeCum[focal];
+      for (int target = focal; target < Main.N; target++) {
+        if (focal == target) {
+          continue;
+        }
+        if (knowledgeCumFocal <= knowledgeCum[target]) { // Ascending order; Focal==Target Canceled out
+          rank[focal]++;
+        } else {
+          rank[target]++;
+        }
+      }
+    }
+    for (int focal : focalIndexArray) {
+      int rankOf = rank[focal];
+      rankKnowledge[rankOf] = knowledge[focal];
+    }
+  }
+  
   void setOutcome() {
     setBestRankKnowledge();
     setBeliefDiversity();
@@ -600,6 +627,11 @@ public class Scenario {
     contributionOf = new double[Main.N];
     contributionOfPositive = new double[Main.N];
     contributionOfNegative = new double[Main.N];
+    
+    rankContribution = new double[Main.N];
+    rankContributionPositive = new double[Main.N];
+    rankContributionNegative = new double[Main.N];
+    
     for (int focal : focalIndexArray) {
       for (int m : mIndexArray) {
         int source = beliefSource[focal][m];
@@ -615,6 +647,12 @@ public class Scenario {
       contributionOf[focal] /= Main.M_N;
       contributionOfPositive[focal] /= Main.M_N;
       contributionOfNegative[focal] /= Main.M_N;
+    }
+    for (int focal : focalIndexArray) {
+      int rankFocal = rank[focal];
+      rankContribution[rank[focal]] = contributionOf[focal];
+      rankContributionPositive[rank[focal]] = contributionOfPositive[focal];
+      rankContributionNegative[rank[focal]] = contributionOfNegative[focal];
     }
   }
   

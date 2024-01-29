@@ -6,16 +6,16 @@ import java.util.HashMap;
 public class Main {
   
   //Computation Parameters
-  static int ITERATION = 1000;
+  static int ITERATION = 10000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
   
   //Output Setup
-  static final boolean GET_NET = true;
-  static final boolean GET_MAT = true;
+  static final boolean GET_NET = false;
+  static final boolean GET_MAT = false;
   
   //Key Assumptions
-  static boolean IS_RATIO = false;
+  static boolean IS_RATIO = true;
   static boolean IS_ONE_ON_ONE = false;
   
   //Global Parameters
@@ -31,21 +31,23 @@ public class Main {
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
   static int N_OF_GROUP = 10;
-  static int N_IN_GROUP = 7; // * Should be an odd number
+  static int N_IN_GROUP = 9; // * Should be an odd number
   static int N = N_OF_GROUP * N_IN_GROUP;
   
   //Moving Params
 //  static double[] BETA = {0, .5, 1};
-//  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+//  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
-  static double ALPHA = 2;  //Connected cavemen scaler
-  static double TAU = .5;  //Preferential attachement scaler
+  static double GAMMA = 2;  //Connected cavemen scaler
+  static double TAU = 2;  //Preferential attachement scaler
   
 //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
+  static double[] P_SHARING = new double[]{0, .5, 1};
+//  static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
 //  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
   
   static double P_ACCEPT = .8;
@@ -60,6 +62,10 @@ public class Main {
   
   static final int[] RESULT_KEY_VALUE_OPTIMAL = {
   LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME
+  };
+  
+  static final int[] RESULT_KEY_VALUE_RANK = {
+  LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME, N
   };
   
   static String RUN_ID = "KSVariety";
@@ -83,7 +89,7 @@ public class Main {
   + "Beta"
   + LENGTH_BETA
   + "Alpha"
-  + ALPHA
+  + GAMMA
   + "Tau"
   + TAU
   + "Ps"
