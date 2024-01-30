@@ -48,11 +48,11 @@ public class Scenario {
   double[] contributionOf;
   double[] contributionOfPositive;
   double[] contributionOfNegative;
-  int[] rank;
-  int[] rankKnowledge;
-  double[] rankContribution;
-  double[] rankContributionPositive;
-  double[] rankContributionNegative;
+  int[] rank0;
+  int[] rank0Knowledge;
+  double[] rank0Contribution;
+  double[] rank0ContributionPositive;
+  double[] rank0ContributionNegative;
   
   boolean[][] network;
   int[] degree;
@@ -85,6 +85,7 @@ public class Scenario {
     initializeInstrument();
     initializeRealityIndividual();
     initializeNetwork();
+    setRank();
     setOutcome();
   }
   
@@ -444,7 +445,6 @@ public class Scenario {
   void stepForward() {
     if (isNotConverged) {
       doLearning();
-      setRank();
       setOutcome();
     }
   }
@@ -546,8 +546,8 @@ public class Scenario {
   }
   
     void setRank() {
-    rank = new int[Main.N];
-    rankKnowledge = new int[Main.N];
+    rank0 = new int[Main.N];
+    rank0Knowledge = new int[Main.N];
     for (int focal : focalIndexArray) {
       int knowledgeCumFocal = knowledgeCum[focal];
       for (int target = focal; target < Main.N; target++) {
@@ -555,15 +555,15 @@ public class Scenario {
           continue;
         }
         if (knowledgeCumFocal <= knowledgeCum[target]) { // Ascending order; Focal==Target Canceled out
-          rank[focal]++;
+          rank0[focal]++;
         } else {
-          rank[target]++;
+          rank0[target]++;
         }
       }
     }
     for (int focal : focalIndexArray) {
-      int rankOf = rank[focal];
-      rankKnowledge[rankOf] = knowledge[focal];
+      int rankOf = rank0[focal];
+      rank0Knowledge[rankOf] = knowledge[focal];
     }
   }
   
@@ -628,9 +628,9 @@ public class Scenario {
     contributionOfPositive = new double[Main.N];
     contributionOfNegative = new double[Main.N];
     
-    rankContribution = new double[Main.N];
-    rankContributionPositive = new double[Main.N];
-    rankContributionNegative = new double[Main.N];
+    rank0Contribution = new double[Main.N];
+    rank0ContributionPositive = new double[Main.N];
+    rank0ContributionNegative = new double[Main.N];
     
     for (int focal : focalIndexArray) {
       for (int m : mIndexArray) {
@@ -649,10 +649,10 @@ public class Scenario {
       contributionOfNegative[focal] /= Main.M_N;
     }
     for (int focal : focalIndexArray) {
-      int rankFocal = rank[focal];
-      rankContribution[rank[focal]] = contributionOf[focal];
-      rankContributionPositive[rank[focal]] = contributionOfPositive[focal];
-      rankContributionNegative[rank[focal]] = contributionOfNegative[focal];
+      int rankFocal = rank0[focal];
+      rank0Contribution[rank0[focal]] = contributionOf[focal];
+      rank0ContributionPositive[rank0[focal]] = contributionOfPositive[focal];
+      rank0ContributionNegative[rank0[focal]] = contributionOfNegative[focal];
     }
   }
   

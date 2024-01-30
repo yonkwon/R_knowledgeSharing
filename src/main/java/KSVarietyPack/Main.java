@@ -6,13 +6,13 @@ import java.util.HashMap;
 public class Main {
   
   //Computation Parameters
-  static int ITERATION = 10000;
+  static int ITERATION = 5000;
   //    static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
   
   //Output Setup
-  static final boolean GET_NET = false;
-  static final boolean GET_MAT = false;
+  static final boolean GET_NET = true;
+  static final boolean GET_MAT = true;
   
   //Key Assumptions
   static boolean IS_RATIO = true;
@@ -65,7 +65,7 @@ public class Main {
   };
   
   static final int[] RESULT_KEY_VALUE_RANK = {
-  LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME, N
+  LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
   };
   
   static String RUN_ID = "KSVariety";
