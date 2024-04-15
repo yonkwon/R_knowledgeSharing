@@ -272,130 +272,63 @@ public class Scenario {
         break;
       case 2: // Preferential Attachement
         //Starting lattice
-        int degreeHalf = (Main.N_IN_GROUP - 1) / 2; // degree to the clockwise
-        int degreeEach = degreeHalf * 2;
+        int degreeEach = Main.N_IN_GROUP - 1;
         int degreeSum = degreeEach * Main.N;
         int[] tieIndexArray = new int[degreeSum];
-        int[][] fromTo = new int[degreeSum][2];
+        int[][] tieFromTo = new int[degreeSum][2];
+        double gravityEach = FastMath.exp((double)degreeEach / Main.TAU);
         double[] gravity = new double[Main.N];
-        int d = 0;
-        for (int focal : focalIndexArray) {
+        int tieID = 0;
+        for( int focal : focalIndexArray ){
           degree[focal] = degreeEach;
           gravity[focal] = FastMath.exp(degree[focal] / Main.TAU);
-          for (int i = 0; i < degreeHalf; i++) {
+          for( int i = 0; i < degreeEach; i ++ ){
             int target = (focal + i + 1) % Main.N;
-            tieIndexArray[d] = d;
-            fromTo[d][0] = focal;
-            fromTo[d][1] = target;
+            tieIndexArray[tieID] = tieID;
+            tieFromTo[tieID][0] = focal;
+            tieFromTo[tieID][1] = target;
             network[focal][target] = true;
             network[target][focal] = true;
-            d++;
+            tieID ++;
           }
         }
+        //Rewiring by Gravity
         shuffleFisherYates(tieIndexArray);
-        for (int tie2Rewire : tieIndexArray) {
-          int focal = fromTo[tie2Rewire][0];
-          int targetFrom = fromTo[tie2Rewire][1];
-          if (degree[targetFrom] > 1 &&
-              r.nextDouble() < beta) {
+        for (int focalTie : tieIndexArray) {
+          int tieFrom = tieFromTo[focalTie][0];
+          int tieToOld = tieFromTo[focalTie][1];
+          if( degree[tieToOld] > 1 && r.nextDouble() < beta ){ // FIXED 240415 [tieFrom] -> [tieTo]
             boolean[] isCandidateTo = new boolean[Main.N];
+            double marker = r.nextDouble();
             double gravitySum = 0;
-            for (int target : targetIndexArray) {
-              if (!network[focal][target] &&
-                  focal != target &&
-                  degree[target] > 1
-              ) {
+            double accumulatedProbabiltiy = 0;
+            for( int target : targetIndexArray ){
+              if(
+                !network[tieFrom][target] &&
+                tieFrom != target // FIXED 240415: removed degree[target] > 1
+              ){
                 isCandidateTo[target] = true;
                 gravitySum += gravity[target];
               }
             }
-            double marker = r.nextDouble();
-            double accumulatedProbability = 0;
-            for (int target : targetIndexArray) { //@@ Is this correct?
-              if (isCandidateTo[target]) {
-                accumulatedProbability += gravity[target] / gravitySum;
-                if (marker < accumulatedProbability) {
-                  network[focal][targetFrom] = false;
-                  network[targetFrom][focal] = false;
-                  degree[targetFrom]--;
-                  gravity[targetFrom] = FastMath.exp(degree[target] / Main.TAU);
-                  network[focal][target] = true;
-                  network[target][focal] = true;
-                  degree[target]++;
-                  gravity[target] = FastMath.exp(degree[target] / Main.TAU);
+            for( int tieToNew : targetIndexArray ){
+              if( isCandidateTo[tieToNew] ){
+                accumulatedProbabiltiy += gravity[tieToNew] / gravitySum;
+                if (marker < accumulatedProbabiltiy) {
+                  network[tieFrom][tieToOld] = false;
+                  network[tieToOld][tieFrom] = false;
+                  degree[tieToOld]--;
+                  gravity[tieToOld] = FastMath.exp(degree[tieToNew] / Main.TAU);
+                  network[tieFrom][tieToNew] = true;
+                  network[tieToNew][tieFrom] = true;
+                  degree[tieToNew]++;
+                  gravity[tieToNew] = FastMath.exp(degree[tieToNew] / Main.TAU);
                   break;
                 }
               }
             }
           }
         }
-        break;
-      // old code below
-        /*
-        isPresent = new boolean[Main.N];
-        double[] gravity;
-        //Starting lattice
-        for (int focal = 0; focal < Main.N; focal += Main.N_IN_GROUP) {
-          int next = (focal + Main.N_IN_GROUP) % Main.N;
-          isPresent[focal] = true;
-          isPresent[next] = true;
-          network[focal][next] = true;
-          network[next][focal] = true;
-          degree[focal] = 2;
-        }
-        //Invite one by one, randomly
-        shuffleFisherYates(focalIndexArray);
-        for (int focal : focalIndexArray) {
-          if (isPresent[focal]) {
-            continue;
-          } else {
-            isPresent[focal] = true;
-          }
-          gravity = new double[Main.N];
-          boolean[] isTarget = new boolean[Main.N];
-          double gravitySum = 0;
-          double degreeSum = 0;
-          double[] distance = new double[Main.N];
-          double distanceSum = 0;
-          for (int target : targetIndexArray) {
-            if (isPresent[target] && focal != target) {
-              isTarget[target] = true;
-              degreeSum += degree[target];
-              double absoluteDistance = FastMath.abs(focal - target);
-              distance[target] = FastMath.min(absoluteDistance, Main.N - absoluteDistance);
-              distanceSum += distance[target];
-            }
-          }
-          for (int target : targetIndexArray) {
-            if (isTarget[target]) {
-//                            gravity[target] = FastMath.exp(Main.GAMMA * (beta * (degree[target] / degreeSum) + (1D - beta) * (distance[target] / distanceSum)));
-              gravity[target] = FastMath.exp((beta * degree[target] / Main.GAMMA) + (1D - beta) * (distance[target]));
-              gravitySum += gravity[target];
-//                            System.out.println(focal+" to "+target+": "+(degree[target] / degreeSum)+" & "+(distance[target] / distanceSum)+" -> "+gravity[target]/gravitySum);
-//                            System.out.println("@"+beta+" ... "+focal + " to " + target + ": " + (degree[target]) + " & " + (distance[target]) + " -> " + gravity[target]);
-            }
-          }
-          for (int z = 1; z < Main.N_IN_GROUP; z++) {
-            double marker = r.nextDouble();
-            double accumulatedProbability = 0;
-            for (int target : targetIndexArray) { //@@ Is this correct?
-              if (isTarget[target]) {
-                accumulatedProbability += gravity[target] / gravitySum;
-                if (marker < accumulatedProbability) {
-                  network[focal][target] = true;
-                  network[target][focal] = true;
-                  degree[focal]++;
-                  degree[target]++;
-                  gravitySum -= gravity[target];
-                  gravity[target] = 0;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        break;
-         */
     }
     
     shortestDistance = new double[Main.N][Main.N];
@@ -650,9 +583,9 @@ public class Scenario {
     }
     for (int focal : focalIndexArray) {
       int rankFocal = rank0[focal];
-      rank0Contribution[rank0[focal]] = contributionOf[focal];
-      rank0ContributionPositive[rank0[focal]] = contributionOfPositive[focal];
-      rank0ContributionNegative[rank0[focal]] = contributionOfNegative[focal];
+      rank0Contribution[rankFocal] = contributionOf[focal];
+      rank0ContributionPositive[rankFocal] = contributionOfPositive[focal];
+      rank0ContributionNegative[rankFocal] = contributionOfNegative[focal];
     }
   }
   

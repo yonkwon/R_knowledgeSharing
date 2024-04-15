@@ -21,7 +21,7 @@ public class Main {
   //Global Parameters
   static int M = 100;
   static int S = 5;
-  static int TIME = 1000 + 1;
+  static int TIME = 500 + 1;
   
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -31,26 +31,29 @@ public class Main {
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
   static int N_OF_GROUP = 10;
-  static int N_IN_GROUP = 9; // * Should be an odd number
+  static int N_IN_GROUP = 5; // * Should be an odd number
   static int N = N_OF_GROUP * N_IN_GROUP;
   
   //Moving Params
-//  static double[] BETA = {0, .5, 1};
-  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-//  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//  static double[] BETA = {0, 1};
+//  static double[] BETA = new double[]{0, .1, 1};
+//  static double[] BETA = new double[]{0, .25, .5, .75, 1};
+//  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
-  static double GAMMA = 2;  //Connected cavemen scaler
-  static double TAU = 2;  //Preferential attachement scaler
+  static double GAMMA = 1;  //Connected cavemen scaler
+  static double TAU = 1;  //Preferential attachement scaler
   
 //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
-  static double[] P_SHARING = new double[]{0, .5, 1};
+//  static double[] P_SHARING = new double[]{0, .1, 1};
 //  static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
-//  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+//  static double[] P_SHARING = new double[]{0, .01, .02, .03, .04, .05, .1};
 //  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
   
-  static double P_ACCEPT = .8;
+  static double P_ACCEPT = .5;
   static double P_LEARNING = .2;
   
   //Instrumental Params
@@ -88,7 +91,7 @@ public class Main {
   + ")"
   + "Beta"
   + LENGTH_BETA
-  + "Alpha"
+  + "Gamma"
   + GAMMA
   + "Tau"
   + TAU
