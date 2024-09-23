@@ -6,7 +6,7 @@ import java.util.HashMap;
 public class Main {
   
   //Computation Parameters
-  static int ITERATION = 100000;
+  static int ITERATION = 5000;
       static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
   
@@ -15,7 +15,7 @@ public class Main {
   static final boolean GET_MAT = true;
   
   //Key Assumptions
-  static boolean IS_RATIO = true;
+  static boolean IS_RATIO = false;
   static boolean IS_ONE_ON_ONE = true;
   
   //Global Parameters
@@ -36,9 +36,9 @@ public class Main {
   
   //Moving Params
 //  static double[] BETA = {0, 1};
-  static double[] BETA = new double[]{0, .1, 1};
+//  static double[] BETA = new double[]{0, .1, 1};
 //  static double[] BETA = new double[]{0, .25, .5, .75, 1};
-//  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
 //  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
   static double GAMMA = 1;  //Connected cavemen scaler
@@ -46,11 +46,11 @@ public class Main {
   
   //  static double[] P_SHARING = new double[]{0};
 //  static double[] P_SHARING = new double[]{0, 1};
-//    static double[] P_SHARING = new double[]{0, .1, 1};
+    static double[] P_SHARING = new double[]{0, .1, 1};
 //  static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
 //  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
 //  static double[] P_SHARING = new double[]{0, .01, .02, .03, .04, .05, .1};
-  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
   
   static double P_ACCEPT = .5;

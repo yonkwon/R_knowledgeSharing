@@ -1,4 +1,4 @@
-package KSReplicationPack;
+package KSProbabilistic;
 
 public class ProgressBar {
 
@@ -20,8 +20,8 @@ public class ProgressBar {
     java.util.Date timeCurrent = new java.util.Date(System.currentTimeMillis());
 
     System.out.println(
-        timeCurrent + "\t" +
-            "Iterated: " + finishedIteration + " / " + iterationMax +
+        timeCurrent+"\t"+
+        "Iterated: " + finishedIteration + " / " + iterationMax +
             " (" + String.format("%.02f", progress) + "%)" +
             "\t\tElapsed: " + String.format("%.02f", timeElapsed) + " Hr" +
             "\t\tLeft: " + String.format("%.02f", timeLeft) + " Hr"

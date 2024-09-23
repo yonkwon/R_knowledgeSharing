@@ -1,7 +1,8 @@
-package KSReplicationPack;
+package KSProbabilistic;
+
+import static org.apache.commons.math3.util.FastMath.pow;
 
 import com.google.common.util.concurrent.AtomicDouble;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,62 +11,85 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.math3.util.FastMath.pow;
-
 class Computation {
-
-  AtomicDouble[][][][] innovativeCapabilityAVGAtomic;
-  AtomicDouble[][][][] innovativeCapabilitySTDAtomic;
+  
+  AtomicDouble[][][][] knowledgeAVGAtomic;
+  AtomicDouble[][][][] knowledgeSTDAtomic;
+  
+  AtomicDouble[][][][] knowledgeBestAVGAtomic;
+  AtomicDouble[][][][] knowledgeBestSTDAtomic;
+  AtomicDouble[][][][] knowledgeBestSourceDiversityAVGAtomic;
+  AtomicDouble[][][][] knowledgeBestSourceDiversitySTDAtomic;
+  
+  AtomicDouble[][][][] knowledgeMinMaxAVGAtomic;
+  AtomicDouble[][][][] knowledgeMinMaxSTDAtomic;
+  
   AtomicDouble[][][][] beliefDiversityAVGAtomic;
   AtomicDouble[][][][] beliefDiversitySTDAtomic;
   AtomicDouble[][][][] beliefSourceDiversityAVGAtomic;
   AtomicDouble[][][][] beliefSourceDiversitySTDAtomic;
+  
   AtomicDouble[][][][] centralizationAVGAtomic;
   AtomicDouble[][][][] centralizationSTDAtomic;
   AtomicDouble[][][][] efficiencyAVGAtomic;
   AtomicDouble[][][][] efficiencySTDAtomic;
+  
   AtomicDouble[][][] optimalBetaAVGAtomic;
   AtomicDouble[][][] optimalBetaSTDAtomic;
+  
   AtomicDouble[][][][][] rankContributionAVGAtomic;
   AtomicDouble[][][][][] rankContributionSTDAtomic;
   AtomicDouble[][][][][] rankContributionPositiveAVGAtomic;
   AtomicDouble[][][][][] rankContributionPositiveSTDAtomic;
   AtomicDouble[][][][][] rankContributionNegativeAVGAtomic;
   AtomicDouble[][][][][] rankContributionNegativeSTDAtomic;
-
-  double[][][][] innovativeCapabilityAVG;
-  double[][][][] innovativeCapabilitySTD;
+  
+  //In double arrays
+  double[][][][] knowledgeAVG;
+  double[][][][] knowledgeSTD;
+  
+  double[][][][] knowledgeBestAVG;
+  double[][][][] knowledgeBestSTD;
+  double[][][][] knowledgeBestSourceDiversityAVG;
+  double[][][][] knowledgeBestSourceDiversitySTD;
+  
+  double[][][][] knowledgeMinMaxAVG;
+  double[][][][] knowledgeMinMaxSTD;
+  
   double[][][][] beliefDiversityAVG;
   double[][][][] beliefDiversitySTD;
   double[][][][] beliefSourceDiversityAVG;
   double[][][][] beliefSourceDiversitySTD;
+  
   double[][][][] centralizationAVG;
   double[][][][] centralizationSTD;
   double[][][][] efficiencyAVG;
   double[][][][] efficiencySTD;
+  
   double[][][] optimalBetaAVG;
   double[][][] optimalBetaSTD;
+  
   double[][][][][] rankContributionAVG;
   double[][][][][] rankContributionSTD;
   double[][][][][] rankContributionPositiveAVG;
   double[][][][][] rankContributionPositiveSTD;
   double[][][][][] rankContributionNegativeAVG;
   double[][][][][] rankContributionNegativeSTD;
-
+  
   ProgressBar pb;
-
+  
   Computation() {
   }
-
+  
   public void printNetwork() {
     DecimalFormat df = new DecimalFormat("0.00");
-
+    
     try {
       Files.createDirectories(Paths.get(Main.PATH_CSV));
     } catch (IOException e) {
       e.printStackTrace();
     }
-
+    
     for (int nt = 0; nt < Main.LENGTH_NETWORK_TYPE; nt++) {
       for (int b = 0; b < Main.LENGTH_BETA; b++) {
         for (int ps = 0; ps < Main.LENGTH_P_SHARING; ps++) {
@@ -78,10 +102,10 @@ class Computation {
             case 2 -> ntString = "PrefAtt";
           }
           String params
-              = "_" + ntString
-              + "_beta" + df.format(beta)
-              + "_psha" + df.format(pSharing)
-              + "_t" + Main.TIME;
+          = "_" + ntString
+            + "_beta" + df.format(beta)
+            + "_psha" + df.format(pSharing)
+            + "_t" + Main.TIME;
           Scenario src = new Scenario(nt, beta, pSharing);
           for (int t = 0; t < Main.TIME; t++) {
             src.stepForward();
@@ -92,7 +116,7 @@ class Computation {
       }
     }
   }
-
+  
   public void doExperiment() {
     pb = new ProgressBar(Main.ITERATION);
     setSpace();
@@ -100,10 +124,16 @@ class Computation {
     runFullExperiment();
     averageFullExperiment();
   }
-
+  
   private void setSpace() {
-    innovativeCapabilityAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    innovativeCapabilitySTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeSTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestSTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestSourceDiversityAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestSourceDiversitySTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeMinMaxAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeMinMaxSTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefDiversityAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefDiversitySTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefSourceDiversityAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
@@ -120,9 +150,15 @@ class Computation {
     rankContributionPositiveSTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME][Main.N];
     rankContributionNegativeAVGAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME][Main.N];
     rankContributionNegativeSTDAtomic = new AtomicDouble[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME][Main.N];
-
-    innovativeCapabilityAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    innovativeCapabilitySTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    
+    knowledgeAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeSTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestSTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestSourceDiversityAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeBestSourceDiversitySTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeMinMaxAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    knowledgeMinMaxSTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefDiversityAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefDiversitySTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefSourceDiversityAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
@@ -140,7 +176,7 @@ class Computation {
     rankContributionNegativeAVG = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME][Main.N];
     rankContributionNegativeSTD = new double[Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME][Main.N];
   }
-
+  
   private void setAtomic() {
     for (int nt = 0; nt < Main.LENGTH_NETWORK_TYPE; nt++) {
       for (int ps = 0; ps < Main.LENGTH_P_SHARING; ps++) {
@@ -148,8 +184,14 @@ class Computation {
           optimalBetaAVGAtomic[nt][ps][t] = new AtomicDouble();
           optimalBetaSTDAtomic[nt][ps][t] = new AtomicDouble();
           for (int b = 0; b < Main.LENGTH_BETA; b++) {
-            innovativeCapabilityAVGAtomic[nt][ps][b][t] = new AtomicDouble();
-            innovativeCapabilitySTDAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeAVGAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeSTDAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeBestAVGAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeBestSTDAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeBestSourceDiversityAVGAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeBestSourceDiversitySTDAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeMinMaxAVGAtomic[nt][ps][b][t] = new AtomicDouble();
+            knowledgeMinMaxSTDAtomic[nt][ps][b][t] = new AtomicDouble();
             beliefDiversityAVGAtomic[nt][ps][b][t] = new AtomicDouble();
             beliefDiversitySTDAtomic[nt][ps][b][t] = new AtomicDouble();
             beliefSourceDiversityAVGAtomic[nt][ps][b][t] = new AtomicDouble();
@@ -158,7 +200,7 @@ class Computation {
             centralizationSTDAtomic[nt][ps][b][t] = new AtomicDouble();
             efficiencyAVGAtomic[nt][ps][b][t] = new AtomicDouble();
             efficiencySTDAtomic[nt][ps][b][t] = new AtomicDouble();
-            for (int n = 0; n < Main.N; n++) {
+            for( int n = 0; n < Main.N; n++ ){
               rankContributionAVGAtomic[nt][ps][b][t][n] = new AtomicDouble();
               rankContributionSTDAtomic[nt][ps][b][t][n] = new AtomicDouble();
               rankContributionPositiveAVGAtomic[nt][ps][b][t][n] = new AtomicDouble();
@@ -171,7 +213,7 @@ class Computation {
       }
     }
   }
-
+  
   private void runFullExperiment() {
     ExecutorService workStealingPool = Executors.newWorkStealingPool();
     for (int iteration = 0; iteration < Main.ITERATION; iteration++) {
@@ -185,7 +227,7 @@ class Computation {
       System.out.println(e);
     }
   }
-
+  
   private void averageFullExperiment() {
     for (int nt = 0; nt < Main.LENGTH_NETWORK_TYPE; nt++) {
       for (int ps = 0; ps < Main.LENGTH_P_SHARING; ps++) {
@@ -194,9 +236,18 @@ class Computation {
           optimalBetaSTD[nt][ps][t] = optimalBetaSTDAtomic[nt][ps][t].get() / Main.ITERATION;
           optimalBetaSTD[nt][ps][t] = pow(optimalBetaSTD[nt][ps][t] - pow(optimalBetaAVG[nt][ps][t], 2), .5);
           for (int b = 0; b < Main.LENGTH_BETA; b++) {
-            innovativeCapabilityAVG[nt][ps][b][t] = innovativeCapabilityAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
-            innovativeCapabilitySTD[nt][ps][b][t] = innovativeCapabilitySTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
-            innovativeCapabilitySTD[nt][ps][b][t] = pow(innovativeCapabilitySTD[nt][ps][b][t] - pow(innovativeCapabilityAVG[nt][ps][b][t], 2), .5);
+            knowledgeAVG[nt][ps][b][t] = knowledgeAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeSTD[nt][ps][b][t] = knowledgeSTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeSTD[nt][ps][b][t] = pow(knowledgeSTD[nt][ps][b][t] - pow(knowledgeAVG[nt][ps][b][t], 2), .5);
+            knowledgeBestAVG[nt][ps][b][t] = knowledgeBestAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeBestSTD[nt][ps][b][t] = knowledgeBestSTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeBestSTD[nt][ps][b][t] = pow(knowledgeBestSTD[nt][ps][b][t] - pow(knowledgeBestAVG[nt][ps][b][t], 2), .5);
+            knowledgeBestSourceDiversityAVG[nt][ps][b][t] = knowledgeBestSourceDiversityAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeBestSourceDiversitySTD[nt][ps][b][t] = knowledgeBestSourceDiversitySTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeBestSourceDiversitySTD[nt][ps][b][t] = pow(knowledgeBestSourceDiversitySTD[nt][ps][b][t] - pow(knowledgeBestSourceDiversityAVG[nt][ps][b][t], 2), .5);
+            knowledgeMinMaxAVG[nt][ps][b][t] = knowledgeMinMaxAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeMinMaxSTD[nt][ps][b][t] = knowledgeMinMaxSTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
+            knowledgeMinMaxSTD[nt][ps][b][t] = pow(knowledgeMinMaxSTD[nt][ps][b][t] - pow(knowledgeMinMaxAVG[nt][ps][b][t], 2), .5);
             beliefDiversityAVG[nt][ps][b][t] = beliefDiversityAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
             beliefDiversitySTD[nt][ps][b][t] = beliefDiversitySTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
             beliefDiversitySTD[nt][ps][b][t] = pow(beliefDiversitySTD[nt][ps][b][t] - pow(beliefDiversityAVG[nt][ps][b][t], 2), .5);
@@ -209,7 +260,7 @@ class Computation {
             efficiencyAVG[nt][ps][b][t] = efficiencyAVGAtomic[nt][ps][b][t].get() / Main.ITERATION;
             efficiencySTD[nt][ps][b][t] = efficiencySTDAtomic[nt][ps][b][t].get() / Main.ITERATION;
             efficiencySTD[nt][ps][b][t] = pow(efficiencySTD[nt][ps][b][t] - pow(efficiencyAVG[nt][ps][b][t], 2), .5);
-            for (int n = 0; n < Main.N; n++) {
+            for( int n = 0; n < Main.N; n ++ ){
               rankContributionAVG[nt][ps][b][t][n] = rankContributionAVGAtomic[nt][ps][b][t][n].get() / Main.ITERATION;
               rankContributionSTD[nt][ps][b][t][n] = rankContributionSTDAtomic[nt][ps][b][t][n].get() / Main.ITERATION;
               rankContributionSTD[nt][ps][b][t][n] = pow(rankContributionSTD[nt][ps][b][t][n] - pow(rankContributionAVG[nt][ps][b][t][n], 2), .5);
@@ -225,12 +276,12 @@ class Computation {
       }
     }
   }
-
+  
   class iterationWrapper implements Runnable {
-
+    
     iterationWrapper() {
     }
-
+    
     @Override
     public void run() {
       for (int nt = 0; nt < Main.LENGTH_NETWORK_TYPE; nt++) {
@@ -240,23 +291,23 @@ class Computation {
       }
       pb.stepNext();
     }
-
+    
   }
-
+  
   class SingleRun {
-
+    
     int networkType;
     int pSharingIndex;
     double pSharing;
-
-    AtomicDouble[][] innovativeCapabilityAVGAtomicPart;
-    AtomicDouble[][] innovativeCapabilitySTDAtomicPart;
-    AtomicDouble[][] innovativeCapabilityBestAVGAtomicPart;
-    AtomicDouble[][] innovativeCapabilityBestSTDAtomicPart;
-    AtomicDouble[][] innovativeCapabilityBestSourceDiversityAVGAtomicPart;
-    AtomicDouble[][] innovativeCapabilityBestSourceDiversitySTDAtomicPart;
-    AtomicDouble[][] innovativeCapabilityMinMaxAVGAtomicPart;
-    AtomicDouble[][] innovativeCapabilityMinMaxSTDAtomicPart;
+    
+    AtomicDouble[][] knowledgeAVGAtomicPart;
+    AtomicDouble[][] knowledgeSTDAtomicPart;
+    AtomicDouble[][] knowledgeBestAVGAtomicPart;
+    AtomicDouble[][] knowledgeBestSTDAtomicPart;
+    AtomicDouble[][] knowledgeBestSourceDiversityAVGAtomicPart;
+    AtomicDouble[][] knowledgeBestSourceDiversitySTDAtomicPart;
+    AtomicDouble[][] knowledgeMinMaxAVGAtomicPart;
+    AtomicDouble[][] knowledgeMinMaxSTDAtomicPart;
     AtomicDouble[][] beliefDiversityAVGAtomicPart;
     AtomicDouble[][] beliefDiversitySTDAtomicPart;
     AtomicDouble[][] beliefSourceDiversityAVGAtomicPart;
@@ -273,7 +324,7 @@ class Computation {
     AtomicDouble[][][] rankContributionPositiveSTDAtomicPart;
     AtomicDouble[][][] rankContributionNegativeAVGAtomicPart;
     AtomicDouble[][][] rankContributionNegativeSTDAtomicPart;
-
+    
     SingleRun(int networkType, int pSharingIndex) {
       this.networkType = networkType;
       this.pSharingIndex = pSharingIndex;
@@ -281,10 +332,16 @@ class Computation {
       initializeResultSpace();
       run();
     }
-
+    
     void initializeResultSpace() {
-      innovativeCapabilityAVGAtomicPart = innovativeCapabilityAVGAtomic[networkType][pSharingIndex];
-      innovativeCapabilitySTDAtomicPart = innovativeCapabilitySTDAtomic[networkType][pSharingIndex];
+      knowledgeAVGAtomicPart = knowledgeAVGAtomic[networkType][pSharingIndex];
+      knowledgeSTDAtomicPart = knowledgeSTDAtomic[networkType][pSharingIndex];
+      knowledgeBestAVGAtomicPart = knowledgeBestAVGAtomic[networkType][pSharingIndex];
+      knowledgeBestSTDAtomicPart = knowledgeBestSTDAtomic[networkType][pSharingIndex];
+      knowledgeBestSourceDiversityAVGAtomicPart = knowledgeBestSourceDiversityAVGAtomic[networkType][pSharingIndex];
+      knowledgeBestSourceDiversitySTDAtomicPart = knowledgeBestSourceDiversitySTDAtomic[networkType][pSharingIndex];
+      knowledgeMinMaxAVGAtomicPart = knowledgeMinMaxAVGAtomic[networkType][pSharingIndex];
+      knowledgeMinMaxSTDAtomicPart = knowledgeMinMaxSTDAtomic[networkType][pSharingIndex];
       beliefDiversityAVGAtomicPart = beliefDiversityAVGAtomic[networkType][pSharingIndex];
       beliefDiversitySTDAtomicPart = beliefDiversitySTDAtomic[networkType][pSharingIndex];
       beliefSourceDiversityAVGAtomicPart = beliefSourceDiversityAVGAtomic[networkType][pSharingIndex];
@@ -302,7 +359,7 @@ class Computation {
       rankContributionNegativeAVGAtomicPart = rankContributionNegativeAVGAtomic[networkType][pSharingIndex];
       rankContributionNegativeSTDAtomicPart = rankContributionNegativeSTDAtomic[networkType][pSharingIndex];
     }
-
+    
     void run() {
       Scenario[] scs = new Scenario[Main.LENGTH_BETA];
       for (int b = 0; b < Main.LENGTH_BETA; b++) {
@@ -320,14 +377,22 @@ class Computation {
       for (int t = 0; t < Main.TIME; t++) {
         //Recording first
         synchronized (this) {
-          int maxinnovativeCapabilityAvgB = -1;
-          double maxinnovativeCapabilityAvg = Double.MIN_VALUE;
+          int maxKnowledgeAvgB = -1;
+          double maxKnowledgeAvg = Double.MIN_VALUE;
           for (int b = 0; b < Main.LENGTH_BETA; b++) {
             Scenario sc = scs[b];
-            if (sc.knowledgeAvg > maxinnovativeCapabilityAvg) {
-              maxinnovativeCapabilityAvg = sc.knowledgeAvg;
-              maxinnovativeCapabilityAvgB = b;
+            if (sc.knowledgeAvg > maxKnowledgeAvg) {
+              maxKnowledgeAvg = sc.knowledgeAvg;
+              maxKnowledgeAvgB = b;
             }
+            knowledgeAVGAtomicPart[b][t].addAndGet(sc.knowledgeAvg);
+            knowledgeSTDAtomicPart[b][t].addAndGet(pow(sc.knowledgeAvg, 2));
+            knowledgeBestAVGAtomicPart[b][t].addAndGet(sc.knowledgeBest);
+            knowledgeBestSTDAtomicPart[b][t].addAndGet(pow(sc.knowledgeBest, 2));
+            knowledgeBestSourceDiversityAVGAtomicPart[b][t].addAndGet(sc.knowledgeBestSourceDiversity);
+            knowledgeBestSourceDiversitySTDAtomicPart[b][t].addAndGet(pow(sc.knowledgeBestSourceDiversity, 2));
+            knowledgeMinMaxAVGAtomicPart[b][t].addAndGet(sc.knowledgeMinMax);
+            knowledgeMinMaxSTDAtomicPart[b][t].addAndGet(pow(sc.knowledgeMinMax, 2));
             beliefDiversityAVGAtomicPart[b][t].addAndGet(sc.beliefDiversity);
             beliefDiversitySTDAtomicPart[b][t].addAndGet(pow(sc.beliefDiversity, 2));
             beliefSourceDiversityAVGAtomicPart[b][t].addAndGet(sc.beliefSourceDiversity);
@@ -336,7 +401,7 @@ class Computation {
             centralizationSTDAtomicPart[b][t].addAndGet(pow(sc.centralization, 2));
             efficiencyAVGAtomicPart[b][t].addAndGet(sc.efficiency);
             efficiencySTDAtomicPart[b][t].addAndGet(pow(sc.efficiency, 2));
-            for (int n = 0; n < Main.N; n++) {
+            for( int n = 0; n < Main.N; n ++ ){
               rankContributionAVGAtomicPart[b][t][n].addAndGet(sc.rank0Contribution[n]);
               rankContributionSTDAtomicPart[b][t][n].addAndGet(pow(sc.rank0Contribution[n], 2));
               rankContributionPositiveAVGAtomicPart[b][t][n].addAndGet(sc.rank0ContributionPositive[n]);
@@ -346,12 +411,12 @@ class Computation {
             }
             sc.stepForward();
           }
-          optimalBetaAVGAtomicPart[t].addAndGet(Main.BETA[maxinnovativeCapabilityAvgB]);
-          optimalBetaSTDAtomicPart[t].addAndGet(pow(Main.BETA[maxinnovativeCapabilityAvgB], 2));
+          optimalBetaAVGAtomicPart[t].addAndGet(Main.BETA[maxKnowledgeAvgB]);
+          optimalBetaSTDAtomicPart[t].addAndGet(pow(Main.BETA[maxKnowledgeAvgB], 2));
         }
       }
     }
-
+    
   }
-
+  
 }
