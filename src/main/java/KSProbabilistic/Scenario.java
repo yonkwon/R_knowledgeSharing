@@ -7,25 +7,27 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
 public class Scenario {
-  
+
   RandomGenerator r;
   boolean isNotConverged = true;
-  
+
   int[] focalIndexArray;
   int[] targetIndexArray;
+  int[] dyadIndexArray;
+  int[][] dyad2DIndexArray;
   int[] mIndexArray;
-  
+
   boolean isRatio;
   boolean isOneOnOne;
-  
+
   double beta;
   double pSharing;
   double[] pSharingOf;
   int networkType;
-  
+
   int nSharer;
   int nSeeker;
-  
+
   boolean[] reality;
   boolean[][] belief;
   boolean[][] belief0;
@@ -35,7 +37,9 @@ public class Scenario {
   double beliefDiversity;
   int[] nCorrectBelief0;
   int[] nIncorrectBelief0;
-  
+
+  double[][] transferWeight;
+  double[] transferWeightSum;
   int[] knowledge;
   int[] knowledge0;
   int[] knowledgeCum;
@@ -52,16 +56,16 @@ public class Scenario {
   double[] rank0Contribution;
   double[] rank0ContributionPositive;
   double[] rank0ContributionNegative;
-  
+
   boolean[][] network;
   int[] degree;
   int[] groupOf;
-  
+
   double knowledgeAvg;
-  
+
   double centralization;
   double efficiency;
-  
+
   Scenario(int networkType, double beta, double pSharing) {
     this.networkType = networkType;
     this.beta = beta;
@@ -70,7 +74,7 @@ public class Scenario {
     isOneOnOne = Main.IS_ONE_ON_ONE;
     initialize();
   }
-  
+
   Scenario(int networkType, double beta, double pSharing, boolean isRatio, boolean isOneOnOne) {
     this.networkType = networkType;
     this.beta = beta;
@@ -79,7 +83,7 @@ public class Scenario {
     this.isOneOnOne = isOneOnOne;
     initialize();
   }
-  
+
   void initialize() {
     initializeInstrument();
     initializeRealityIndividual();
@@ -87,21 +91,36 @@ public class Scenario {
     setRank();
     setOutcome();
   }
-  
+
   void initializeInstrument() {
     r = new MersenneTwister();
     focalIndexArray = new int[Main.N];
     targetIndexArray = new int[Main.N];
+    int nDyad = Main.N * (Main.N - 1) / 2;
+    dyadIndexArray = new int[nDyad];
+    dyad2DIndexArray = new int[nDyad][2];
     mIndexArray = new int[Main.M];
     for (int n = 0; n < Main.N; n++) {
       focalIndexArray[n] = n;
       targetIndexArray[n] = n;
     }
+    int d = 0;
+    for (int i = 0; i < Main.N; i++) {
+      for (int j = i; j < Main.N; j++) {
+        if (i == j) {
+          continue;
+        }
+        dyadIndexArray[d] = d;
+        dyad2DIndexArray[d][0] = i;
+        dyad2DIndexArray[d][1] = j;
+        d++;
+      }
+    }
     for (int m = 0; m < Main.M; m++) {
       mIndexArray[m] = m;
     }
   }
-  
+
   public void initializeRealityIndividual() {
     reality = new boolean[Main.M];
     belief = new boolean[Main.N][Main.M];
@@ -115,7 +134,7 @@ public class Scenario {
     knowledgeBest = Integer.MIN_VALUE;
     knowledgeWorst = Integer.MAX_VALUE;
     pSharingOf = new double[Main.N];
-    
+
     // Reality & Belief
     for (int m : mIndexArray) {
       reality[m] = r.nextBoolean();
@@ -143,12 +162,12 @@ public class Scenario {
       }
       beliefSourceCount[focal][focal] = Main.M; // All M beliefs come from the self = n
     }
-    
+
     knowledge0 = knowledge.clone();
     knowledgeCum = knowledge.clone();
     knowledgeAvg /= Main.M_N;
     knowledgeMinMax = (double) (knowledgeBest - knowledgeWorst) / Main.M;
-    
+
     // pSharing
     if (isRatio) {
       nSharer = (int) (pSharing * Main.N);
@@ -160,13 +179,13 @@ public class Scenario {
       for (int n = nSharer; n < Main.N; n++) {
         pSharingOf[focalIndexArray[n]] = 0D;
       }
-    } else {
+    } else { //!isRatio
       for (int n : focalIndexArray) {
         pSharingOf[n] = pSharing;
       }
     }
   }
-  
+
   void initializeNetwork() {
     network = new boolean[Main.N][Main.N];
     degree = new int[Main.N];
@@ -276,20 +295,20 @@ public class Scenario {
         int degreeSum = degreeEach * Main.N;
         int[] tieIndexArray = new int[degreeSum];
         int[][] tieFromTo = new int[degreeSum][2];
-        double gravityEach = FastMath.exp((double)degreeEach / Main.TAU);
+        double gravityEach = FastMath.exp((double) degreeEach / Main.TAU);
         double[] gravity = new double[Main.N];
         int tieID = 0;
-        for( int focal : focalIndexArray ){
+        for (int focal : focalIndexArray) {
           degree[focal] = degreeEach;
           gravity[focal] = FastMath.exp(degree[focal] / Main.TAU);
-          for( int i = 0; i < degreeEach; i ++ ){
+          for (int i = 0; i < degreeEach; i++) {
             int target = (focal + i + 1) % Main.N;
             tieIndexArray[tieID] = tieID;
             tieFromTo[tieID][0] = focal;
             tieFromTo[tieID][1] = target;
             network[focal][target] = true;
             network[target][focal] = true;
-            tieID ++;
+            tieID++;
           }
         }
         //Rewiring by Gravity
@@ -297,22 +316,22 @@ public class Scenario {
         for (int focalTie : tieIndexArray) {
           int tieFrom = tieFromTo[focalTie][0];
           int tieToOld = tieFromTo[focalTie][1];
-          if( degree[tieToOld] > 1 && r.nextDouble() < beta ){ // FIXED 240415 [tieFrom] -> [tieTo]
+          if (degree[tieToOld] > 1 && r.nextDouble() < beta) { // FIXED 240415 [tieFrom] -> [tieTo]
             boolean[] isCandidateTo = new boolean[Main.N];
             double marker = r.nextDouble();
             double gravitySum = 0;
             double accumulatedProbabiltiy = 0;
-            for( int target : targetIndexArray ){
-              if(
-                !network[tieFrom][target] &&
-                tieFrom != target // FIXED 240415: removed degree[target] > 1
-              ){
+            for (int target : targetIndexArray) {
+              if (
+                  !network[tieFrom][target] &&
+                      tieFrom != target // FIXED 240415: removed degree[target] > 1
+              ) {
                 isCandidateTo[target] = true;
                 gravitySum += gravity[target];
               }
             }
-            for( int tieToNew : targetIndexArray ){
-              if( isCandidateTo[tieToNew] ){
+            for (int tieToNew : targetIndexArray) {
+              if (isCandidateTo[tieToNew]) {
                 accumulatedProbabiltiy += gravity[tieToNew] / gravitySum;
                 if (marker < accumulatedProbabiltiy) {
                   network[tieFrom][tieToOld] = false;
@@ -330,7 +349,7 @@ public class Scenario {
           }
         }
     }
-    
+
     shortestDistance = new double[Main.N][Main.N];
     for (int i = 0; i < Main.N; i++) {
       for (int j = 0; j < Main.N; j++) {
@@ -343,7 +362,7 @@ public class Scenario {
       }
       shortestDistance[i][i] = 0; // Do not delete this line
     }
-    
+
     for (int k = 0; k < Main.N; k++) {
       for (int i = 0; i < Main.N; i++) {
         for (int j = 0; j < Main.N; j++) {
@@ -353,7 +372,7 @@ public class Scenario {
         }
       }
     }
-    
+
     for (int i = 0; i < Main.N; i++) {
       for (int j = 0; j < Main.N; j++) {
         if (shortestDistance[i][j] == Main.N) {
@@ -361,7 +380,7 @@ public class Scenario {
         }
       }
     }
-    
+
     efficiency = 0;
     for (int focal : focalIndexArray) {
       for (int target = focal; target < Main.N; target++) {
@@ -373,75 +392,56 @@ public class Scenario {
     }
     efficiency /= Main.N * (Main.N - 1D) / 2D;
   }
-  
-  
+
+
   void stepForward() {
     if (isNotConverged) {
       doLearning();
       setOutcome();
     }
   }
-  
+
   void doLearning() {
-    boolean[] isBusy = new boolean[Main.N];
     isNotConverged = false;
-  shuffleFisherYates(focalIndexArray);
+    int[] numTransferred = new int[Main.N];
+    shuffleFisherYates(focalIndexArray);
     for (int focal : focalIndexArray) {
-      if (isOneOnOne &&
-          isBusy[focal]) {
-        continue;
-      }
-      if (r.nextDouble() < pSharingOf[focal]) {
-        shuffleFisherYates(targetIndexArray);
+      if (numTransferred[focal] < Main.MAX_TRANSFER) {
+        double marker = r.nextDouble();
+        double probabilityCum = 0;
         for (int target : targetIndexArray) {
-          if (isOneOnOne && isBusy[target]) {
-            continue;
-          }
           if (network[focal][target] &&
-              knowledge[focal] > knowledge[target] &&
-              r.nextDouble() < Main.P_ACCEPT
+              knowledge[focal] != knowledge[target]
           ) {
-            isBusy[focal] = true;
-            isBusy[target] = true;
-            for (int m : mIndexArray) {
-              if (belief[target][m] != belief[focal][m]) {
-                isNotConverged = true;
-                if (r.nextDouble() < Main.P_LEARNING) {
-                  belief[target][m] = belief[focal][m];
-                  beliefSourceCount[target][beliefSource[target][m]]--;
-                  beliefSource[target][m] = beliefSource[focal][m];
-                  beliefSourceCount[target][beliefSource[target][m]]++; // Not necessarily focal
+            isNotConverged = true;
+            if (knowledge[focal] > knowledge[target]) {
+              probabilityCum += (knowledge[focal] - knowledge[target]) * pSharingOf[focal];
+            } else {
+              probabilityCum += (knowledge[target] - knowledge[focal]) * (1D - pSharingOf[focal]);
+            }
+            if (probabilityCum > marker) {
+              int source;
+              int recipient;
+              if (knowledge[focal] > knowledge[target]) {
+                source = focal;
+                recipient = target;
+              }else{
+                source = target;
+                recipient = focal;
+              }
+              for( int m : mIndexArray ){
+                if( r.nextDouble() < Main.P_LEARNING ){
+                  belief[recipient][m] = belief[source][m];
+                  beliefSourceCount[recipient][beliefSource[recipient][m]]--;
+                  beliefSource[recipient][m] = beliefSource[source][m];
+                  beliefSourceCount[recipient][beliefSource[recipient][m]]++;
                 }
               }
+              knowledge[recipient] = getKnowledgeOf(recipient);
+              numTransferred[focal]++;
+              numTransferred[target]++;
+              break;
             }
-            knowledge[target] = getKnowledgeOf(target);
-            break;
-          }
-        }
-      } else {
-        for (int target : targetIndexArray) {
-          if (isOneOnOne && isBusy[target]) {
-            continue;
-          }
-          if (network[focal][target] &&
-              knowledge[focal] < knowledge[target] &&
-              r.nextDouble() < Main.P_ACCEPT
-          ) {
-            isBusy[focal] = true;
-            isBusy[target] = true;
-            for (int m : mIndexArray) {
-              if (belief[target][m] != belief[focal][m]) {
-                isNotConverged = true;
-                if (r.nextDouble() < Main.P_LEARNING) {
-                  belief[focal][m] = belief[target][m];
-                  beliefSourceCount[focal][beliefSource[focal][m]]--;
-                  beliefSource[focal][m] = beliefSource[target][m];
-                  beliefSourceCount[focal][beliefSource[focal][m]]++;
-                }
-              }
-            }
-            knowledge[focal] = getKnowledgeOf(focal);
-            break;
           }
         }
       }
@@ -450,7 +450,7 @@ public class Scenario {
       knowledgeCum[focal] += knowledge[focal];
     }
   }
-  
+
   int getKnowledgeOf(int focal) {
     int knowledge = 0;
     boolean[] beliefOfFocal = belief[focal];
@@ -468,7 +468,7 @@ public class Scenario {
     }
     return knowledge;
   }
-  
+
   double getBeliefSourceDiversityOf(int focal) {
     //Gini-Simpson Index: https://en.wikipedia.org/wiki/Diversity_index#Gini%E2%80%93Simpson_index
     int beliefSourceDiversity = 0;
@@ -477,8 +477,8 @@ public class Scenario {
     }
     return 1D - (beliefSourceDiversity / (double) (Main.M * Main.M));
   }
-  
-    void setRank() {
+
+  void setRank() {
     rank0 = new int[Main.N];
     rank0Knowledge = new int[Main.N];
     for (int focal : focalIndexArray) {
@@ -499,7 +499,7 @@ public class Scenario {
       rank0Knowledge[rankOf] = knowledge[focal];
     }
   }
-  
+
   void setOutcome() {
     setBestRankKnowledge();
     setBeliefDiversity();
@@ -507,7 +507,7 @@ public class Scenario {
     setContribution();
     setCentralization();
   }
-  
+
   void setBestRankKnowledge() {
     knowledgeAvg = 0; //@Fix 220624
     knowledgeBest = Integer.MIN_VALUE;
@@ -526,7 +526,7 @@ public class Scenario {
     knowledgeAvg /= Main.M_N;
     knowledgeMinMax = (double) (knowledgeBest - knowledgeWorst) / Main.M;
   }
-  
+
   void setBeliefDiversity() {
     beliefDiversity = 0;
     for (int focal : focalIndexArray) {
@@ -543,7 +543,7 @@ public class Scenario {
     }
     beliefDiversity /= Main.M_N;
   }
-  
+
   void setBeliefSourceDiversity() {
     beliefSourceDiversity = 0;
     for (int focal : focalIndexArray) {
@@ -555,16 +555,16 @@ public class Scenario {
     }
     beliefSourceDiversity /= Main.N;
   }
-  
+
   void setContribution() {
     contributionOf = new double[Main.N];
     contributionOfPositive = new double[Main.N];
     contributionOfNegative = new double[Main.N];
-    
+
     rank0Contribution = new double[Main.N];
     rank0ContributionPositive = new double[Main.N];
     rank0ContributionNegative = new double[Main.N];
-    
+
     for (int focal : focalIndexArray) {
       for (int m : mIndexArray) {
         int source = beliefSource[focal][m];
@@ -588,41 +588,41 @@ public class Scenario {
       rank0ContributionNegative[rankFocal] = contributionOfNegative[focal];
     }
   }
-  
+
   void setCentralization() {
     centralization = 0;
     double[] centrality = new double[Main.N];
     double maxCentrality = Double.MIN_VALUE;
-    
+
     for (int focal : focalIndexArray) {
       for (int target : targetIndexArray) {
         centrality[focal] += beliefSourceCount[target][focal];
       }
     }
-    
+
     for (int rank : focalIndexArray) {
       centrality[rank] /= Main.M_N;
       if (centrality[rank] > maxCentrality) {
         maxCentrality = centrality[rank];
       }
     }
-    
+
     for (int rank : focalIndexArray) {
       centralization += (maxCentrality - centrality[rank]);
     }
-    
+
     centralization /= (double) Main.N; // Theoretical maximum of Sum[Cx(p*)-Cx(pi)] over 1:N
   }
-  
+
   void shuffleFisherYates(int[] nArray) {
-    for (int i = Main.N - 1; i > 0; i--) {
+    for (int i = nArray.length - 1; i > 0; i--) {
       int j = r.nextInt(i + 1);
       int temp = nArray[i];
       nArray[i] = nArray[j];
       nArray[j] = temp;
     }
   }
-  
+
   void printCSV(String fileName) {
     try {
       FileWriter csvWriter;
@@ -651,7 +651,7 @@ public class Scenario {
       csvWriter.append(",");
       csvWriter.append("CONTRIBUTION");
       csvWriter.append("\n");
-      
+
       //Edge
       for (int focal = 0; focal < Main.N; focal++) {
         for (int target = 0; target < Main.N; target++) {
@@ -702,5 +702,5 @@ public class Scenario {
       throw new RuntimeException(e);
     }
   }
-  
+
 }
