@@ -295,7 +295,6 @@ public class Scenario {
         int degreeSum = degreeEach * Main.N;
         int[] tieIndexArray = new int[degreeSum];
         int[][] tieFromTo = new int[degreeSum][2];
-        double gravityEach = FastMath.exp((double) degreeEach / Main.TAU);
         double[] gravity = new double[Main.N];
         int tieID = 0;
         for (int focal : focalIndexArray) {
@@ -409,28 +408,40 @@ public class Scenario {
       if (numTransferred[focal] < Main.MAX_TRANSFER) {
         double marker = r.nextDouble();
         double probabilityCum = 0;
+        double[] probability = new double[Main.N];
+        double probabilityDenominator = 0;
         for (int target : targetIndexArray) {
           if (network[focal][target] &&
               knowledge[focal] != knowledge[target]
           ) {
-            isNotConverged = true;
             if (knowledge[focal] > knowledge[target]) {
-              probabilityCum += (knowledge[focal] - knowledge[target]) * pSharingOf[focal];
+              probability[target] = (knowledge[focal] - knowledge[target]) * pSharingOf[focal];
             } else {
-              probabilityCum += (knowledge[target] - knowledge[focal]) * (1D - pSharingOf[focal]);
+              probability[target] = (knowledge[target] - knowledge[focal]) * (1D - pSharingOf[focal]);
             }
+            probabilityDenominator += probability[target];
+          }
+        }
+        for (int target : targetIndexArray) {
+          if (
+//              network[focal][target] &&
+//              knowledge[focal] != knowledge[target] &&
+              probability[target] != 0
+          ) {
+            isNotConverged = true;
+            probabilityCum += probability[target] / probabilityDenominator;
             if (probabilityCum > marker) {
               int source;
               int recipient;
               if (knowledge[focal] > knowledge[target]) {
                 source = focal;
                 recipient = target;
-              }else{
+              } else {
                 source = target;
                 recipient = focal;
               }
-              for( int m : mIndexArray ){
-                if( r.nextDouble() < Main.P_LEARNING ){
+              for (int m : mIndexArray) {
+                if (r.nextDouble() < Main.P_LEARNING) {
                   belief[recipient][m] = belief[source][m];
                   beliefSourceCount[recipient][beliefSource[recipient][m]]--;
                   beliefSource[recipient][m] = beliefSource[source][m];
@@ -600,15 +611,15 @@ public class Scenario {
       }
     }
 
-    for (int rank : focalIndexArray) {
-      centrality[rank] /= Main.M_N;
-      if (centrality[rank] > maxCentrality) {
-        maxCentrality = centrality[rank];
+    for (int focal : focalIndexArray) {
+      centrality[focal] /= Main.M_N;
+      if (centrality[focal] > maxCentrality) {
+        maxCentrality = centrality[focal];
       }
     }
 
-    for (int rank : focalIndexArray) {
-      centralization += (maxCentrality - centrality[rank]);
+    for (int focal : focalIndexArray) {
+      centralization += (maxCentrality - centrality[focal]);
     }
 
     centralization /= (double) Main.N; // Theoretical maximum of Sum[Cx(p*)-Cx(pi)] over 1:N
