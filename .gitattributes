@@ -1,0 +1,12 @@
+# Always keep gradlew executable and LF line endings
+gradlew text eol=lf
+
+# Shell scripts - LF line endings
+*.sh text eol=lf
+
+# Batch scripts - CRLF line endings
+*.bat text eol=crlf
+
+# Gradle and properties files - LF line endings
+*.gradle text eol=lf
+*.properties text eol=lf
