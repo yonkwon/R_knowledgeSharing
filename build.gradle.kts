@@ -1,3 +1,6 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 plugins {
     id("java")
 }
@@ -31,4 +34,18 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+
+    archiveFileName.set("KSProbabilistic-$timestamp.jar")
+
+    manifest {
+        attributes["Main-Class"] = "KSProbabilistic.Main"
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }
