@@ -1,3 +1,6 @@
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 plugins {
     id("java")
 }
@@ -26,9 +29,23 @@ dependencies {
     implementation("gov.nist.math:jama:1.0.3")
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation("com.google.guava:guava:32.1.2-jre")
+    implementation("com.google.guava:guava:33.4.8-jre")
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+
+    archiveFileName.set("ks-$timestamp.jar")
+
+    manifest {
+        attributes["Main-Class"] = "Main"
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }

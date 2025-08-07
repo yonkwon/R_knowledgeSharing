@@ -1,4 +1,4 @@
-package KSDyadic;
+package KSFinal;
 
 public class ProgressBar {
 

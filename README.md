@@ -1,3 +1,3 @@
-# Research_KnowledgeSharing
+# Knowledge Sharing
 
-Agent-based models for the paper: Kwon, Kim, Kim, & Rhee (Working)
+Agent-based models and analysis tools for the knowledge sharing paper (Kwon, Kim, Kim, & Rhee (Working))

@@ -1,0 +1,976 @@
+---
+title: "KSProbGrapher"
+author: "Yongha Kwon"
+format: pdf
+editor: visual
+---
+
+# Grapher for Tzogos Sequel
+
+## Library Import
+
+```{r import_library, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE) 
+library(R.matlab)
+library(tidyverse) # tibble (dataframe)
+library(ggplot2) # Plot
+library(ggrepel) # geom_text_repel
+library(scales) # parse_format() functionm
+library(viridis) # colormap
+library(ggsci) # colormap
+library(svglite) # print in *.svg format
+library(metR) # geom text contour
+```
+
+## Data Import
+
+```{r import_data, eval=FALSE}
+# rm(list=ls())
+setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # Set SRC DIR as WD
+file_data <- file.choose()
+data <- readMat(file_data)
+fig_id <- tools::file_path_sans_ext((basename(file_data)))
+```
+
+## Global Setting
+
+```{r global_setting, eval=F}
+fig_width <- 6
+fig_height <- 4
+fig_dpi <- 600
+fig_alpha <- .75
+label_size <- 10
+tick_label_size <- 8
+legend_size <- 8
+fig_open <- T # Open figure on R dev. env.
+fig_save <- T # Save figure as *.svg
+
+ci_alpha <- .99
+ci_multiplier <- as.numeric(qnorm(ci_alpha) / sqrt(data$para.iteration))
+
+label_network_type <- c(
+  'Random Spanning Tree',
+  'Connected Cavemen',
+  'Preferential Attachment'
+)
+label_network_type <- factor(label_network_type, levels = label_network_type)
+
+label_network_character <- c(
+  'Density',
+  'Subgroup Integration',
+  'Centralization'
+)
+label_network_character <- factor(label_network_character, levels = label_network_character)
+```
+
+## Figure 2. beta to efficiency, multiple network types
+
+```{r fig2}
+set_fig2_network_type <- 1:3
+
+df_fig2 <- data.frame()
+for( nt in set_fig2_network_type ){
+  df_next <- data.frame(
+    nt = label_network_character[nt],
+    beta = t(data$para.a.b),
+    efficiency = data$r.effi.avg[nt, , 1, 1]
+  )
+  df_fig2 <- rbind(df_fig2, df_next)
+}
+
+fig2 <- ggplot(df_fig2, 
+               aes(
+                 x = beta, 
+                 y = efficiency, 
+                 color = nt,
+                 linetype = nt
+                 )
+               ) +
+  geom_line() +
+  xlab(bquote(beta
+              ~ '(Organizational Design Parameter)')) +
+  ylab('Efficiency of\nOrganizational Design') +
+  # scale_color_npg() +
+  # scale_color_aaas() +
+  scale_color_manual(values = c("#00B050", "#E81727", "#1a80bb")) +
+  theme_bw() +
+  theme(
+    text = element_text(size = label_size, color = 'black'),
+    axis.title = element_text(size = label_size, color = 'black'),
+    axis.text = element_text(size = tick_label_size, color = 'black'),
+    legend.title = element_blank(),
+    legend.box = 'vertical',
+    legend.position = 'right'
+  )
+
+fig2
+
+fig2_params_label <- paste0('fig2alt')
+
+ggsave(
+  paste0(fig_id, 
+         '_', 
+         fig2_params_label, 
+         '.png'),
+  plot = fig2,
+  units = 'in',
+  width = 5,
+  height = 3,
+  dpi = fig_dpi
+)
+```
+
+## Figure 3. Effect of Knowledge Sharing Levels on Relationship Between Organizational Design and Innovative Capability
+
+```{r fig3}
+set_fig3_beta <- 1:data$para.l.b
+# set_fig3_p.s <- 1:data$para.l.p.s
+set_fig3_p.s <- c(1, round(data$para.l.p.s/2), data$para.l.p.s)
+# set_fig3_p.s <- c(1, 2, data$para.l.p.s)
+set_fig3_time <- data$para.time
+
+set_fig3_outcome <- data$r.know.avg[, set_fig3_beta, , set_fig3_time]
+set_fig3_outcome_label <- 'Innovative Capability'
+
+# set_fig3_outcome <- data$r.cent.avg[, set_fig3_beta, , set_fig3_time]
+# set_fig3_outcome_label <- 'Centralization of Contribution'
+
+label_network_type_abc <- paste0('(', LETTERS[1:length(label_network_type)], ') ', label_network_type)
+label_network_type_abc <- factor(label_network_type_abc, levels = label_network_type_abc)
+
+df_fig3 <- data.frame()
+for(nt in 1:data$para.l.net.type) {
+  for (p.s in set_fig3_p.s) {
+    df_next <- data.frame(
+      nt = label_network_character[nt],
+      beta = data$para.a.b[set_fig3_beta],
+      # p.s = paste0('p[sharing]==', sprintf(data$para.a.p.s[p.s], fmt = '%#.1f')),
+      p.s = paste0('p[sharing]==', sprintf(data$para.a.p.s[p.s], fmt = '%#.2f')),
+      outcome = set_fig3_outcome[nt, , p.s],
+      beta_opt = data$para.a.b[which.max(set_fig3_outcome[nt, , p.s])],
+      outcome_opt = set_fig3_outcome[nt, which.max(set_fig3_outcome[nt, , p.s]), p.s]
+    )
+    df_fig3 <- rbind(df_fig3, df_next)
+  }
+}
+
+fig3 <- ggplot(df_fig3, 
+                aes(x = beta, 
+                    y = outcome, 
+                    color = p.s,
+                    linetype = p.s)
+                ) +
+  geom_line() +
+  geom_point(aes(x=beta_opt, y=outcome_opt), shape=8) +
+  facet_grid(.~nt) +
+  # scale_color_npg(labels = parse_format()) +
+  # scale_color_manual(labels = parse_format(), values = c('blue', 'purple', 'red')) +
+  scale_color_manual(labels = parse_format(), values = c("#00B050", "#E81727", "#1a80bb")) +
+  scale_linetype_manual(labels = parse_format(), values = c('dashed','longdash','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab(bquote(beta
+              ~ '(Organizational Design Parameter)')) +
+  ylab(set_fig3_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    axis.text.x=element_text(angle = 45, hjust=1),
+    panel.spacing.x = unit(8, 'mm'),
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'bottom'
+  )
+
+fig3_params_label <- paste0(
+  'fig3',
+  'p.s', paste0(set_fig3_p.s, collapse = ","),
+  'time', set_fig3_time,
+  'res_', set_fig3_outcome_label
+)
+
+fig3
+
+ggsave(
+  paste0(fig_id, '_', fig3_params_label, '.png'),
+  plot = fig3,
+  units = 'in', 
+  width = 6.5,
+  height = 3,
+  dpi = fig_dpi
+)
+```
+
+## Figure 3ALT. Effect of Knowledge Sharing Levels on Relationship Between Organizational Design and Innovative Capability
+
+```{r fig3}
+set_fig3_beta <- 1:data$para.l.b
+set_fig3_time <- data$para.time
+
+set_fig3_outcome <- data$r.know.avg[, set_fig3_beta, , set_fig3_time]
+set_fig3_outcome_label <- 'Organizational Learning Efficacy'
+
+# set_fig3_outcome <- data$r.cent.avg[, set_fig3_beta, , set_fig3_time]
+# set_fig3_outcome_label <- 'Centralization of Contribution'
+
+label_p.s <- c('Knowledge Sharing', 'Knowledge Seeking')
+label_p.s <- factor(label_p.s, levels = label_p.s)
+
+df_fig3 <- data.frame()
+for(nt in 1:data$para.l.net.type) {
+  df_next <- data.frame(
+    nt = label_network_character[nt],
+    beta = data$para.a.b[set_fig3_beta],
+    p.s = label_p.s[2],
+    # p.s = paste0('p[sharing]==', sprintf(data$para.a.p.s[1], fmt = '%#.0f')),
+    outcome = set_fig3_outcome[nt, , 1],
+    beta_opt = data$para.a.b[which.max(set_fig3_outcome[nt, , 1])],
+    outcome_opt = set_fig3_outcome[nt, which.max(set_fig3_outcome[nt, , 1]), 1]
+  )
+  df_fig3 <- rbind(df_fig3, df_next)
+  
+  df_next <- data.frame(
+    nt = label_network_character[nt],
+    beta = data$para.a.b[set_fig3_beta],
+    p.s = label_p.s[1],
+    # p.s = paste0('p[sharing]==', sprintf(data$para.a.p.s[data$para.l.p.s], fmt = '%#.0f')),
+    outcome = set_fig3_outcome[nt, , data$para.l.p.s],
+    beta_opt = data$para.a.b[which.max(set_fig3_outcome[nt, , data$para.l.p.s])],
+    outcome_opt = set_fig3_outcome[nt, which.max(set_fig3_outcome[nt, , data$para.l.p.s]), data$para.l.p.s]
+  )
+  df_fig3 <- rbind(df_fig3, df_next)
+}
+
+fig3 <- ggplot(df_fig3, 
+                aes(x = beta, 
+                    y = outcome, 
+                    color = p.s,
+                    linetype = p.s)
+                ) +
+  geom_line() +
+  geom_point(aes(x=beta_opt, y=outcome_opt), shape=8) +
+  facet_grid(.~nt) +
+  # scale_color_npg() +
+  scale_color_manual(values = c("#e64b35ff", "#00a087ff")) +
+  scale_linetype_manual(values = c('solid', 'longdash')) +
+  scale_x_continuous(expand = c(.05, 0)) +
+  xlab(bquote(beta
+              ~ '(Organizational Design Parameter)')) +
+  ylab(set_fig3_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    axis.text.x=element_text(angle = 45, hjust=1),
+    panel.spacing.x = unit(8, 'mm'),
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'bottom'
+  )
+
+fig3
+
+fig3_params_label <- paste0(
+  'fig3a',
+  'time', set_fig3_time,
+  'res_', set_fig3_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig3_params_label, '.png'),
+  plot = fig3,
+  units = 'in', 
+  width = 6.5,
+  height = 3,
+  dpi = fig_dpi
+)
+```
+
+## Figure 4. Knowledge Sharing -\> Optimal Beta \@ t
+
+```{r fig4}
+set_fig4_time <- data$para.time
+# set_fig4_p.s <- c(1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21)
+# set_fig4_p.s <- c(1, 5, 9, 13, 17, 21)
+set_fig4_p.s <- 1:data$para.l.p.s
+set_fig4_outcome <- data$r.know.avg[, , set_fig4_p.s, set_fig4_time]
+set_fig4_outcome_label <- 'Innovative Capability'
+
+df_fig4 <- data.frame()
+for( nt in 1:data$para.l.net.type ){
+  for( p.s in 1:length(set_fig4_p.s) ){
+    df_next <- data.frame(
+      # nt = label_network_type[nt],
+      nt = label_network_character[nt],
+      p.s = data$para.a.p.s[p.s],
+      opt_beta =  data$para.a.b[which.max(set_fig4_outcome[nt, , p.s])]
+    )
+    df_fig4 <- rbind(df_fig4, df_next)
+  }
+}
+
+fig4 <- ggplot(df_fig4, 
+               aes(
+                 x = p.s, 
+                 y = opt_beta, 
+                 color = nt)
+               ) +
+  geom_line() +
+  geom_point(shape='*', size = 5) +
+  scale_color_npg() +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab(bquote(italic(p[Sharing])~'(Knowledge Sharing Level)')) +
+  ylab(bquote(italic(beta)^'*'~'(Optimal Design)')) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig4
+
+fig4_params_label <- paste0(
+  'fig4',
+  'time', set_fig4_time
+)
+
+ggsave(
+  paste0(fig_id, '_', fig4_params_label, '.png'),
+  plot = fig4,
+  units = 'in', 
+  width = 4,
+  height = 2,
+  dpi = fig_dpi
+)
+```
+
+## Figure 7. Knowledge Sharing (x) \* beta (color) \* network (panel) -\> Innovative Capability \@ t
+
+```{r fig7}
+set_fig7_p.s <- 1:data$para.l.p.s
+set_fig7_beta <- c(1, round(data$para.l.b/2), data$para.l.b)
+# set_fig7_beta <- c(1, 3, data$para.l.b)
+set_fig7_time <- data$para.time
+
+set_fig7_outcome <- data$r.know.avg[, , , set_fig7_time]
+set_fig7_outcome_label <- 'Innovative Capability'
+
+# set_fig7_outcome <- data$r.bfdv.avg[, , , set_fig7_time]
+# set_fig7_outcome_label <- 'Belief Diversity'
+
+# set_fig7_outcome <- data$r.kbst.avg[, , , set_fig7_time]
+# set_fig7_outcome_label <- 'Best Knowledge'
+
+# set_fig7_outcome <- data$r.cent.avg[, , , set_fig7_time]
+# set_fig7_outcome_label <- 'Centralization of Contribution'
+
+df_fig7 <- data.frame()
+for(nt in 1:data$para.l.net.type) {
+  for( beta in set_fig7_beta) {
+    df_next <- data.frame(
+      nt = label_network_character[nt],
+      beta = paste0('beta==', sprintf(data$para.a.b[beta], fmt = '%#.2f')),
+      p.s = data$para.a.p.s[set_fig7_p.s],
+      outcome = set_fig7_outcome[nt, beta, ]
+    )
+    df_fig7 <- rbind(df_fig7, df_next)
+  }
+}
+
+fig7 <- ggplot(df_fig7, 
+               aes(
+                 x = p.s, 
+                 y = outcome, 
+                 color = beta,
+                 linetype = beta
+                 )
+               ) +
+  geom_line() +
+  facet_grid(.~nt) +
+  scale_color_npg(labels = parse_format()) +
+  scale_linetype_manual(labels = parse_format(), values = c('dashed','longdash','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  # xlab(bquote(italic(p[Sharing])~'(Knowledge Sharing Level)')) +
+  xlab(bquote(italic(p[Sharing])~'(Proportion of Knowledge Sharers)')) +
+  ylab(set_fig7_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    axis.text.x=element_text(angle = 45, hjust=1),
+    panel.spacing.x = unit(8, 'mm'),
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'bottom'
+  )
+
+fig7
+
+fig7_params_label <- paste0(
+  'fig7',
+  'p.s', paste0(set_fig7_p.s, collapse = ","),
+  'time', set_fig7_time,
+  'res_', set_fig7_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig7_params_label, '.png'),
+  plot = fig7,
+  units = 'in', 
+  width = 6.5,
+  height = 3,
+  dpi = fig_dpi
+)
+```
+
+```{r fig6}
+set_fig6_network_type <- 1
+set_fig6_beta <- data$para.l.b
+set_fig6_time <- c(10, 50, data$para.time)
+set_fig6_time_label <- c(paste0('atop(\'Early Phase\',italic(t)==',set_fig6_time[1], ')'),
+                      paste0('atop(\'Middle Phase\',italic(t)==',set_fig6_time[2], ')'),
+                      paste0('atop(\'Late Phase\',italic(t)==',set_fig6_time[3]-1, ')'))
+set_fig6_time_label <- factor(set_fig6_time_label, levels = set_fig6_time_label)
+
+set_fig6_ps_id <- c(1, data$para.l.p.s)
+set_fig6_ps_label <- c('atop(\'Knowledge Seeking Dominant\',italic(p[sharing])==0)', 'atop(\'Knowledge Sharing Dominant\',italic(p[sharing])==1)')
+set_fig6_ps_label <- c('\'Knowledge Seeking\'', '\'Knowledge Sharing\'')
+set_fig6_ps_label <- factor(set_fig6_ps_label, levels = set_fig6_ps_label)
+
+set_posneg_label <- c('Positive Contribution (%)', 'Negative Contribution (%)')
+set_posneg_label <- factor(set_posneg_label, levels = set_posneg_label)
+
+df_fig6 <- list()
+i = 0
+panel_id = 0
+for( set_t_id_id in 1:length(set_fig6_time) ){
+  set_t_id <- set_fig6_time[set_t_id_id]
+  set_t_label <- set_fig6_time_label[set_t_id_id]
+  for( set_ps_id_id in 1:length(set_fig6_ps_id) ){
+    panel_id <- panel_id+1
+    set_ps_id <- set_fig6_ps_id[set_ps_id_id]
+    set_ps_label <- set_fig6_ps_label[set_ps_id_id]
+    i <- i + 1
+    contribution_se <- ci_multiplier * c(data$r.r.conp.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ])
+    df_fig6[[i]] <- data.frame(
+      panel_label = paste0('Panel (', LETTERS[panel_id], ')'),
+      time = set_t_label,
+      p_sharing = set_ps_label,
+      posneg = set_posneg_label[1],
+      rank = 1:data$para.n,
+      contribution = data$r.r.conp.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ],
+      contribution_sum = data$r.r.conp.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ] + data$r.r.conn.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ],
+      contribution_hi = data$r.r.conp.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ] + contribution_se,
+      contribution_lo = data$r.r.conp.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ] - contribution_se
+    )
+    i <- i + 1
+    contribution_se <-ci_multiplier * c(data$r.r.conn.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ])
+    df_fig6[[i]] <- data.frame(
+      panel_label = paste0('Panel (', LETTERS[panel_id], ')'),
+      time = set_t_label,
+      p_sharing = set_ps_label,
+      posneg = set_posneg_label[2],
+      rank = 1:data$para.n,
+      contribution = -data$r.r.conn.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ],
+      contribution_hi = data$r.r.conn.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ] + contribution_se,
+      contribution_lo = data$r.r.conn.avg[set_fig6_network_type, set_fig6_beta, set_ps_id, set_t_id, ] - contribution_se
+    )
+  }
+}
+df_fig6 <- dplyr::bind_rows(df_fig6)
+
+axes <- aes(
+  fill = posneg,
+  x = rank,
+  y = contribution,
+  ymax = contribution_hi,
+  ymin = contribution_lo
+)
+
+fig6 <- ggplot(data = df_fig6, mapping = axes) +
+  facet_grid(time ~ p_sharing , labeller = label_parsed, switch = 'y') +
+  # facet_grid(time ~ p_sharing , switch = 'y') +
+  geom_bar(stat='identity', width = .75, color=NA) +
+  # scale_fill_npg() +
+  # scale_fill_viridis(discrete = T, end=.8, option = 'plasma') +
+  scale_fill_manual(values = c('#50C878', '#4B0082')) +
+  geom_text(aes(label = panel_label), x=-Inf, y=Inf, hjust = -.1, vjust = 1.5, size=3, colour='black') +
+  labs( x = expression(Rank~by~Initial~Performance), y = ('Total Contribution')) +
+  # scale_x_continuous(limits = c(1, data$para.n), breaks = c(1 , seq(10, data$para.n, by = 10)), expand = c(.05, .05)) +
+  scale_y_continuous(label = function(x) percent(abs(x))) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title.x=element_text(size=label_size, color='black'),
+    axis.title.y=element_blank(),
+    axis.text=element_text(size=tick_label_size, color='black'),
+  
+    strip.background = element_blank(),
+    strip.placement = 'outside',
+    strip.text = element_text(size=label_size, color='black'),
+    
+    legend.title = element_blank(),
+    legend.position = 'bottom'
+  )
+
+ggsave(
+  filename = paste0(
+    fig_id,
+    'fig6_',
+    'beta', data$para.a.b[set_fig6_beta],
+    '.png'
+  ),
+  plot = fig6,
+  units = 'in', 
+  width = 5,
+  height = 6,
+  dpi = fig_dpi
+)
+    
+fig6
+```
+
+## Figure 1. t \* Knowledge Sharing -\> Performance \@ average beta
+
+```{r fig1}
+set_fig1_network_type <- 1
+set_fig1_p.s <- 1:data$para.l.p.s
+# set_fig1_p.s <- c(1, 11, 21)
+set_fig1_time_limit <- data$para.time
+set_fig1_time <- 1:set_fig1_time_limit
+
+set_fig1_outcome <- data$r.know.avg[set_fig1_network_type, , , set_fig1_time]
+set_fig1_outcome_label <- 'Firm Performance'
+
+# set_fig1_outcome <- data$r.cent.avg[set_fig1_network_type, , , set_fig1_time]
+# set_fig1_outcome_label <- 'Centralization'
+
+# set_fig1_outcome <- data$r.effi.avg[set_fig1_network_type, , , set_fig1_time]
+# set_fig1_outcome_label <- 'Efficiency'
+
+df_fig1 <- data.frame()
+for( p.s in set_fig1_p.s ){
+  df_next <- data.frame(
+    p.s = paste0('p[sharing]==',data$para.a.p.s[p.s]),
+    time= 1:data$para.time,
+    # outcome = set_fig1_outcome[p.s,]
+    outcome = apply(set_fig1_outcome[,p.s,], MARGIN=2, FUN=mean)
+  )
+  df_fig1 <- rbind(df_fig1, df_next)
+}
+
+
+
+fig1 <- ggplot(df_fig1, aes(x = time, y = outcome, color = p.s)) +
+  geom_line() +
+  scale_color_npg(labels = parse_format()) +
+  scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab('Time Periods') +
+  ylab(set_fig1_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig1
+
+fig1_params_label <- paste0(
+  'fig1',
+  '(', label_network_type[set_fig1_network_type],')',
+  'p.s', paste0(set_fig1_p.s, collapse = ","),
+  'res_', set_fig1_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig1_params_label, '.png'),
+  plot = fig1,
+  units = 'in', 
+  width = 4,
+  height = 2,
+  dpi = fig_dpi
+)
+```
+
+## Figure 2. t \* Knowledge Sharing -\> Performance \@ beta
+
+```{r fig2}
+set_fig2_network_type <- 1
+set_fig2_beta <- 1
+set_fig2_p.s <- 1:data$para.l.p.s
+# set_fig2_p.s <- c(1, 11, 21)
+set_fig2_time_limit <- data$para.time
+set_fig2_time <- 1:set_fig2_time_limit
+
+set_fig2_outcome <- data$r.know.avg[set_fig2_network_type, set_fig2_beta, , set_fig2_time]
+set_fig2_outcome_label <- 'Firm Performance'
+
+df_fig2 <- data.frame()
+for( p.s in set_fig2_p.s ){
+  df_next <- data.frame(
+    p.s = paste0('p[sharing]==',data$para.a.p.s[p.s]),
+    time= 1:data$para.time,
+    outcome = set_fig2_outcome[p.s,]
+  )
+  df_fig2 <- rbind(df_fig2, df_next)
+}
+
+
+
+fig2 <- ggplot(df_fig2, aes(x = time, y = outcome, color = p.s)) +
+  geom_line() +
+  scale_color_npg(labels = parse_format()) +
+  scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab('Time Periods') +
+  ylab(set_fig2_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig2
+
+fig2_params_label <- paste0(
+  'fig2',
+  '(', label_network_type[set_fig2_network_type],')',
+  'b', data$para.a.b[set_fig2_beta],
+  'p.s', paste0(set_fig2_p.s, collapse = ","),
+  'res_', set_fig2_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig2_params_label, '.png'),
+  plot = fig2,
+  units = 'in', 
+  width = 4,
+  height = 2,
+  dpi = fig_dpi
+)
+```
+
+## Figure 3. beta \* Knowledge Sharing -\> Performance \@ t
+
+```{r fig3}
+set_fig3_network_type <- 2
+set_fig3_beta <- 1:data$para.l.b
+# set_fig3_p.s <- c(1, 11, 21)
+set_fig3_p.s <- c(1, 2, 3)
+set_fig3_time <- data$para.time
+
+set_fig3_outcome <- data$r.know.avg[set_fig3_network_type, set_fig3_beta, , set_fig3_time]
+set_fig3_outcome_label <- 'Innovative Capability'
+
+df_fig3 <- data.frame()
+for( p.s in set_fig3_p.s ){
+  df_next <- data.frame(
+    beta = data$para.a.b[set_fig3_beta],
+    p.s = paste0('p[sharing]==', sprintf(data$para.a.p.s[p.s], fmt = '%#.1f')),
+    outcome = set_fig3_outcome[,p.s]
+  )
+  df_fig3 <- rbind(df_fig3, df_next)
+}
+
+fig3 <- ggplot(df_fig3, aes(x = beta, y = outcome, color = p.s)) +
+  geom_line() +
+  scale_color_npg(labels = parse_format()) +
+  scale_linetype_manual(labels = parse_format(), values = c('dotted','dashed','solid')) +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab(bquote(beta
+              ~ '('
+              ~ .(label_network_character[set_fig3_network_type])
+              ~ ')')) +
+  ylab(set_fig3_outcome_label) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig3
+
+fig3_params_label <- paste0(
+  'fig3',
+  '(', label_network_type[set_fig3_network_type],')',
+  'p.s', paste0(set_fig3_p.s, collapse = ","),
+  'time', set_fig3_time,
+  'res_', set_fig3_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig3_params_label, '.png'),
+  plot = fig3,
+  units = 'in', 
+  width = 4,
+  height = 2,
+  dpi = fig_dpi
+)
+```
+
+## Figure 5. Knowledge Sharing -\> Optimal Beta's efficiency \@ t
+
+```{r fig5}
+set_fig5_time <- data$para.time
+set_fig5_outcome <- data$r.know.avg[, , , set_fig5_time]
+set_fig5_efficiency <- data$r.effi.avg[, , , set_fig5_time]
+
+df_fig5 <- data.frame()
+for( nt in 1:data$para.l.net.type ){
+  for( p.s in 1:data$para.l.p.s ){
+    optimal_beta <- which.max(set_fig5_outcome[nt, , p.s])
+    df_next <- data.frame(
+      nt = label_network_character[nt],
+      p.s = data$para.a.p.s[p.s],
+      opt_beta =  data$para.a.b[optimal_beta],
+      efficiency = set_fig5_efficiency[nt, optimal_beta, p.s]
+    )
+    df_fig5 <- rbind(df_fig5, df_next)
+  }
+}
+
+fig5 <- ggplot(df_fig5, 
+               aes(
+                 x = p.s, 
+                 y = efficiency, 
+                 color = nt)
+               ) +
+  geom_line() +
+  geom_point(shape='*', size = 5) +
+  scale_color_npg() +
+  scale_x_continuous(expand = c(0, 0)) +
+  xlab(bquote(italic(p[Sharing])~'(Knowledge Sharing Level)')) +
+  ylab(bquote(italic(rho))) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig5
+
+fig5_params_label <- paste0(
+  'fig5',
+  'time', set_fig5_time
+)
+
+ggsave(
+  paste0(fig_id, '_', fig5_params_label, '.png'),
+  plot = fig5,
+  units = 'in', 
+  width = 4,
+  height = 2,
+  dpi = fig_dpi
+)
+```
+
+## Figure 6. Knowledge Sharing \* Beta -\> Performance \@ t (Heatmap)
+
+```{r fig6}
+set_fig6_network_type <- 1
+set_fig6_time <- data$para.time
+
+set_fig6_outcome <- data$r.know.avg[set_fig6_network_type, , , set_fig6_time]
+set_fig6_outcome_label <- 'Innovative Capability'
+
+df_fig6 <- data.frame()
+for( p.s in 1:data$para.l.p.s ){
+  df_next <- data.frame(
+    p.s = data$para.a.p.s[p.s],
+    beta = t(data$para.a.b),
+    outcome = set_fig6_outcome[,p.s]
+  )
+  df_fig6 <- rbind(df_fig6, df_next)
+}
+
+fig6 <- ggplot(df_fig6, aes(
+    x = p.s, 
+    y = beta, 
+    z = outcome
+    )
+  ) +
+  geom_contour(breaks = seq(0,1, by= .01)) +
+  geom_text_contour(
+    breaks = seq(0,1, by= .01),
+    check_overlap = TRUE,
+    stroke = .2, stroke.color = 'white'
+  ) +
+  scale_fill_viridis()  +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  xlab(bquote(italic(p[sharing]))) +
+  ylab(bquote(italic(beta)
+              ~ '('
+              ~ .(label_network_character[set_fig6_network_type])
+              ~ ')')) +
+  theme_bw() +
+  theme(
+    text=element_text(size=label_size, color='black'),
+    axis.title=element_text(size=label_size, color='black'),
+    axis.text=element_text(size=tick_label_size, color='black'),
+    legend.title = element_blank(),
+    legend.box='vertical',
+    legend.position = 'right'
+  )
+
+fig6
+
+fig6_params_label <- paste0(
+  'fig6',
+  '(', label_network_type[set_fig6_network_type],')',
+  'time', set_fig6_time,
+  'res_', set_fig6_outcome_label
+)
+
+ggsave(
+  paste0(fig_id, '_', fig6_params_label, '.png'),
+  plot = fig6,
+  units = 'in', 
+  width = 4,
+  height = 3,
+  dpi = fig_dpi
+)
+```
+
+# Network Graphs: Knowledge Transfer Pattern (Choose \*.csv files printed by the JAVA code)
+
+-   Figure 5. Knowledge Transfer Pattern Resulting From Knowledge Seeking And Sharing
+-   Figure 7. Knowledge Transfer Pattern Resulting From Knowledge Seeking And Sharing Across Organizational Design
+-   Figure 9. Knowledge Transfer Pattern Resulting From Heterogeneous Behavior
+
+```{r net_knowledge}
+net_width <- 2
+net_height <- 2
+node_size <- 2
+edge_width <- .1
+legend_size <- 8
+# legend_size <- 0 # This setting eliminates legend from the output
+
+net <- NULL
+net_node <- NULL
+net_edge <- NULL
+
+type_label <- c('Knowledge Sharer', 'Knowledge Seeker')
+fill_npg <- pal_npg(palette = c('nrc'), alpha = 1)(2)
+names(fill_npg) <- type_label
+
+files2print <- function(list_file) {
+  for (file in list_file) {
+    dat <- read.csv(file)
+    net_node <<-
+      distinct(dat[, c(
+        'SOURCE',
+        'SOURCE_UNIT',
+        'SOURCE_IS_SHARER',
+        'SOURCE_INIT_KNOWLEDGE',
+        'SOURCE_CONTRIBUTION'
+      )])
+    
+    colnames(net_node) <<- c(
+      'id',
+      'unit',
+      'isSharer',
+      'knowledge0',
+      'contribution'
+    )
+    
+    net_edge <<-
+      distinct(dat[, c('SOURCE', 'TARGET', 'CONTRIBUTION')])
+    net_edge <<- na.omit(net_edge)
+    colnames(net_edge) <<-
+      c('from', 'to', 'contribution')
+    
+    net_node$isSharer <<- ifelse(net_node$isSharer == 1, type_label[1], type_label[2])
+    
+    net <<- graph_from_data_frame(
+      vertices = net_node,
+      d = net_edge,
+      directed = T
+    )
+    
+    set_vertex_attr(net, 'ec', value = eigen_centrality(net)$vector)
+
+    net <<- delete_edges(net, E(net)[E(net)$contribution == 0])
+
+    layout <- create_layout(net, layout = 'fr')
+    pp <- ggraph(layout) + theme_void()
+    pp <- pp +
+      geom_edge_fan(
+        aes(edge_alpha = contribution),
+                    color = 'black',
+                    width = edge_width) +
+      geom_node_point(aes(size = contribution,
+                          fill = isSharer),
+                          shape = 21
+      ) +
+      scale_edge_alpha_continuous(range = c(.1, .75), guide = 'none') +
+      scale_size_continuous(range = c(node_size/5, node_size), guide = 'none') +
+      scale_fill_manual(values = fill_npg)
+    if( legend_size == 0 ) {
+      pp <- pp +
+        theme(legend.position = 'none')
+    }else{
+      pp <- pp +
+        guides(
+          fill = guide_legend(nrow = 2, byrow = TRUE)
+        ) +
+        theme(
+          legend.position = 'bottom',
+          legend.text = element_text(size=legend_size, color='black', margin = margin(r = 5, unit = "pt")),
+          legend.spacing.y = unit(0,'mm'),
+          legend.title = element_blank(),
+          legend.text.align = 0
+        )
+    }
+    
+    file_out <- paste0(dirname(file), '\\',
+                       'knowledgeTransfer_',
+                       ifelse(legend_size == 0, 'woLegend', 'wLegend'),
+                       gsub('csv', 'png', basename(file)))
+    
+    ggsave(
+      file_out,
+      units = 'in',
+      width = net_width,
+      height = net_height,
+      dpi = fig_dpi
+    )
+    
+    print(file_out)
+  }
+  
+}
+
+setwd(dirname(rstudioapi::getSourceEditorContext()$path)) # Set SRC DIR as WD
+files2print(choose.files())
+```
