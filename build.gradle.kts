@@ -29,7 +29,7 @@ dependencies {
     implementation("gov.nist.math:jama:1.0.3")
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation("com.google.guava:guava:32.1.2-jre")
+    implementation("com.google.guava:guava:33.4.8-jre")
 }
 
 tasks.test {
@@ -39,10 +39,10 @@ tasks.test {
 tasks.jar {
     val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
 
-    archiveFileName.set("KSProbabilistic-$timestamp.jar")
+    archiveFileName.set("ks-$timestamp.jar")
 
     manifest {
-        attributes["Main-Class"] = "KSProbabilistic.Main"
+        attributes["Main-Class"] = "Main"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from({

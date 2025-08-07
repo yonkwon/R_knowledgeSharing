@@ -1,4 +1,4 @@
-package KSProbabilistic;
+package KSFinal;
 
 import java.io.File;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ public class Main {
   static boolean IS_ONE_ON_ONE = true;
 
   //Output Setup
-  static final boolean GET_NET = true;
+  static final boolean GET_NET = false;
   static final boolean GET_MAT = true;
 
 //  static final int MAX_TRANSFER = 100;
@@ -101,10 +101,10 @@ public class Main {
           + TAU
           + "Ps"
           + LENGTH_P_SHARING
-          + "Pl"
-          + P_LEARNING
           + "Pa"
-          + P_ACCEPT;
+          + P_ACCEPT
+          + "Pl"
+          + P_LEARNING;
   static String PATH_CSV = new File(".").getAbsolutePath() + "\\" + RUN_ID + PARAMS + "\\";
 
   public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package KSProbabilistic;
+package KSFinal;
 
 import java.io.File;
 import java.io.IOException;

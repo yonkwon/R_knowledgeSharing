@@ -1,4 +1,4 @@
-package KSProbabilistic;
+package KSFinal;
 
 import static org.apache.commons.math3.util.FastMath.pow;
 

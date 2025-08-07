@@ -1,4 +1,4 @@
-package KSProbabilistic;
+package KSFinal;
 
 public class ProgressBar {
 
