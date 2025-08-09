@@ -495,13 +495,16 @@ public class Scenario {
     buffer.or(belief[focal]);
     buffer.xor(reality);
     nCorrectBelief[focal] = buffer.cardinality();
-    for (int m = 0; m < Main.M; m += Main.S) {
-      int mismatchIndex = buffer.nextSetBit(m);
-      if (mismatchIndex == -1 || mismatchIndex >= m + Main.S) {
-        knowledgeFocal += Main.S;
+    if( Main.S != 1 ){
+      for (int m = 0; m < Main.M; m += Main.S) {
+        int mismatchIndex = buffer.nextSetBit(m);
+        if (mismatchIndex == -1 || mismatchIndex >= m + Main.S) {
+          knowledgeFocal += Main.S;
+        }
       }
+    }else{
+      knowledgeFocal = nCorrectBelief[focal];
     }
-
     knowledge[focal] = knowledgeFocal;
   }
 

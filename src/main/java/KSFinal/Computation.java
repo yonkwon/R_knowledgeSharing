@@ -85,7 +85,7 @@ class Computation {
     DecimalFormat df = new DecimalFormat("0.00");
     
     try {
-      Files.createDirectories(Paths.get(Main.PATH_CSV));
+      Files.createDirectories(Main.PATH_CSV);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -110,7 +110,7 @@ class Computation {
           for (int t = 0; t < Main.TIME; t++) {
             src.stepForward();
           }
-          src.printCSV(Main.PATH_CSV + Main.RUN_ID + params);
+          src.printCSV(Main.PATH_CSV.resolve(  Main.RUN_ID + params).toString());
           System.out.println("Network Printed: " + Main.RUN_ID + params);
         }
       }

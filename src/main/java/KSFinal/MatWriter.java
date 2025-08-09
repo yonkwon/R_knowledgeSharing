@@ -12,6 +12,8 @@ import us.hebi.matlab.mat.types.Sinks;
 class MatWriter {
   
   MatWriter(Computation c) {
+    File outDir;
+    File outFile;
     Matrix knowledgeAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix knowledgeSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix knowledgeBestAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
@@ -36,7 +38,13 @@ class MatWriter {
     Matrix rankContributionPositiveSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
     Matrix rankContributionNegativeAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
     Matrix rankContributionNegativeSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
-    
+
+    outDir = new File("mat");
+    if(!outDir.exists()){
+      outDir.mkdirs();
+    }
+    outFile = new File(outDir, Main.RUN_ID + Main.PARAMS + ".mat");
+
     for (int nt = 0; nt < Main.LENGTH_NETWORK_TYPE; nt++) {
       for (int ps = 0; ps < Main.LENGTH_P_SHARING; ps++) {
         for (int t = 0; t < Main.TIME; t++) {
@@ -132,8 +140,9 @@ class MatWriter {
                         .addArray("r_r_conn_avg", rankContributionNegativeAVG)
                         .addArray("r_r_conn_ssq", rankContributionNegativeSSQ)
                         .addArray("perf_seconds", Mat5.newScalar((System.currentTimeMillis() - Main.TIC) / 1000))
-                        .writeTo(Sinks.newStreamingFile(new File(Main.RUN_ID + Main.PARAMS + ".mat")));
-      System.out.println("File Printed");
+                        .writeTo(Sinks.newStreamingFile(outFile));
+
+      System.out.println("File Printed: " + outFile.getAbsolutePath());
     } catch (IOException e) {
       e.printStackTrace();
     }

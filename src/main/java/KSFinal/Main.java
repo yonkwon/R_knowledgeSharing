@@ -1,6 +1,8 @@
 package KSFinal;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class Main {
@@ -11,7 +13,7 @@ public class Main {
   static final long TIC = System.currentTimeMillis();
 
   //Key Assumptions
-  static boolean IS_RATIO = false;
+  static boolean IS_RATIO = true;
   static boolean IS_ONE_ON_ONE = true;
 
   //Output Setup
@@ -22,9 +24,9 @@ public class Main {
   static final int MAX_TRANSFER = 5;
 
   //Global Parameters
-  static int M = 100;
+  static int M = 500;
   static int S = 1;
-  static int TIME = 500 + 1;
+  static int TIME = 1000 + 1;
 
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -34,7 +36,7 @@ public class Main {
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
   static int N_OF_GROUP = 10;
-  static int N_IN_GROUP = 9; // * Should be an odd number
+  static int N_IN_GROUP = 15; // * Should be an odd number
   static int N = N_OF_GROUP * N_IN_GROUP;
 
   //Moving Params
@@ -56,7 +58,7 @@ public class Main {
 //  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
-  static double P_ACCEPT = .5;
+  static double P_ACCEPT = 1.0;
   static double P_LEARNING = .2;
 
   //Instrumental Params
@@ -74,7 +76,7 @@ public class Main {
       LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
   };
 
-  static String RUN_ID = "KSProb";
+  static String RUN_ID = "KSFinal";
 
   static String PARAMS =
       "[r"
@@ -105,7 +107,7 @@ public class Main {
           + P_ACCEPT
           + "Pl"
           + P_LEARNING;
-  static String PATH_CSV = new File(".").getAbsolutePath() + "\\" + RUN_ID + PARAMS + "\\";
+  static Path PATH_CSV = Paths.get(".").toAbsolutePath().normalize().resolve(RUN_ID + PARAMS);
 
   public static void main(String[] args) {
     Computation c = new Computation();
