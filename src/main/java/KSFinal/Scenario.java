@@ -434,7 +434,7 @@ public class Scenario {
         double weightSum = 0;
         shuffleFisherYates(neighborList[focal]);
         for (int target : neighborList[focal]) {
-          if( numTransferred[target] >= Main.MAX_TRANSFER || r.nextDouble() < Main.P_ACCEPT ){
+          if( numTransferred[target] >= Main.MAX_TRANSFER || r.nextDouble() >= Main.P_ACCEPT ){
             continue;
           }
           double diff = knowledge[focal] - knowledge[target];
