@@ -302,60 +302,107 @@ public class Scenario {
             }
           }
         }
-        break;
-      case 2: // Preferential Attachement
-        //Starting lattice
-//        int degreeEach = Main.N_IN_GROUP - 1;
-        int degreeEach = Main.N_OF_GROUP;
-        int degreeSum = degreeEach * Main.N;
-        int[] tieIndexArray = new int[degreeSum];
-        int[][] tieFromTo = new int[degreeSum][2];
-        double[] gravity = new double[Main.N];
-        int tieID = 0;
-        for (int focal : focalIndexArray) {
-          degree[focal] = degreeEach;
-          gravity[focal] = FastMath.exp(degree[focal] / Main.TAU);
-          for (int i = 0; i < degreeEach; i++) {
-            int target = (focal + i + 1) % Main.N;
-            tieIndexArray[tieID] = tieID;
-            tieFromTo[tieID][0] = focal;
-            tieFromTo[tieID][1] = target;
-            network[focal].set(target);
-            network[target].set(focal);
-            tieID++;
+        for( int n = 0; n < Main.N; n ++ ){
+          if( degree[n] == 0 ){
+            System.out.println("network broken at "+n);
           }
         }
-        //Rewiring by Gravity
-        shuffleFisherYates(tieIndexArray);
-        for (int focalTie : tieIndexArray) {
-          int tieFrom = tieFromTo[focalTie][0];
-          int tieToOld = tieFromTo[focalTie][1];
-          if (degree[tieToOld] > 1 && r.nextDouble() < beta) { // FIXED 240415 [tieFrom] -> [tieTo]
-            boolean[] isCandidateTo = new boolean[Main.N];
-            double marker = r.nextDouble();
-            double gravitySum = 0;
-            double accumulatedProbabiltiy = 0;
-            for (int target : targetIndexArray) {
-              if (!network[tieFrom].get(target) && tieFrom != target // FIXED 240415: removed degree[target] > 1
-              ) {
-                isCandidateTo[target] = true;
-                gravitySum += gravity[target];
-              }
+        break;
+      case 2: // Preferential Attachment
+        //Starting lattice
+        int[] positionOf = new int[Main.N];
+        List<Integer> positionList = new ArrayList<>();
+        for( int p = 0; p < Main.L; p ++ ){
+          positionList.add(p);
+        }
+        shuffleFisherYates(positionList);
+        //Initial N0 assignment
+        shuffleFisherYates(focalIndexArray);
+        for( int n = 0; n < Main.N0;  n ++){
+          int focal = focalIndexArray[n];
+          int position = positionList.get(n);
+          positionOf[focal] = position;
+        }
+        //Distance between initial N0 individuals
+        int[][] distanceN0 = new int[Main.N0][Main.N0];
+        for( int i = 0; i < Main.N0; i ++ ){
+          for( int j = i+1; j < Main.N0; j ++ ) {
+            int focal = focalIndexArray[i];
+            int target = focalIndexArray[j];
+            int positionFocal = positionOf[focal];
+            int positionTarget = positionOf[target];
+            int diff = Math.abs(positionFocal - positionTarget);
+            distanceN0[i][j] = FastMath.min(Main.L - diff, diff);
+            distanceN0[j][i] = FastMath.min(Main.L - diff, diff);
+          }
+        }
+        //Initial two connections
+        for( int i = 0; i < Main.N0; i ++){
+          int focal = focalIndexArray[i];
+          int[] distanceN0Focal = distanceN0[i];
+          int firstMinTargetIndex = -1;
+          int secondMinTargetIndex = -1;
+          double firstMinDistance = Double.MAX_VALUE;
+          double secondMinDistance = Double.MAX_VALUE;
+          for( int j = 0; j < Main.N0; j ++ ) {
+            if( i == j ){
+              continue;
             }
-            for (int tieToNew : targetIndexArray) {
-              if (isCandidateTo[tieToNew]) {
-                accumulatedProbabiltiy += gravity[tieToNew] / gravitySum;
-                if (marker < accumulatedProbabiltiy) {
-                  network[tieFrom].clear(tieToOld);
-                  network[tieToOld].clear(tieFrom);
-                  degree[tieToOld]--;
-                  gravity[tieToOld] = FastMath.exp(degree[tieToNew] / Main.TAU);
-                  network[tieFrom].set(tieToNew);
-                  network[tieToNew].set(tieFrom);
-                  degree[tieToNew]++;
-                  gravity[tieToNew] = FastMath.exp(degree[tieToNew] / Main.TAU);
-                  break;
-                }
+            int distanceToTarget = distanceN0Focal[j];
+            if (distanceToTarget < firstMinDistance) {
+              secondMinDistance = firstMinDistance;
+              secondMinTargetIndex = firstMinTargetIndex;
+              firstMinDistance = distanceToTarget;
+              firstMinTargetIndex = j;
+            } else if (distanceToTarget < secondMinDistance) {
+              secondMinDistance = distanceToTarget;
+              secondMinTargetIndex = j;
+            }
+          }
+          int target0 = focalIndexArray[firstMinTargetIndex];
+          int target1 = focalIndexArray[secondMinTargetIndex];
+          if( !network[focal].get(target0) ){
+            network[focal].set(target0);
+            network[target0].set(focal);
+            degree[focal]++;
+            degree[target0]++;
+          }
+          if( !network[focal].get(target1) ){
+            network[focal].set(target1);
+            network[target1].set(focal);
+            degree[focal]++;
+            degree[target1]++;
+          }
+        }
+        // Add remaining individuals
+        for( int i = Main.N0; i < Main.N; i ++ ){
+          int focal = focalIndexArray[i];
+          int positionFocal = positionList.get(i);
+          double[] gravity = new double[i];
+          double gravitySum = 0;
+          for( int j = 0; j < i; j ++ ){
+            int target = focalIndexArray[j];
+            int positionTarget = positionList.get(j);
+            int degreeTarget = degree[target];
+            int diff = FastMath.abs(positionFocal - positionTarget);
+            int dist = FastMath.min(Main.L - diff, diff);
+            gravity[j] = degreeTarget * FastMath.pow(dist, beta*Main.ALPHA_MAX);
+            gravitySum += gravity[j];
+          }
+          for( int z = 0; z < Main.Z; z ++ ){
+            double marker = r.nextDouble();
+            double acc = 0;
+            for( int j = 0; j < i; j ++ ){
+              acc += gravity[j] / gravitySum;
+              if( acc > marker ){
+                int target = focalIndexArray[j];
+                network[focal].set(target);
+                network[target].set(focal);
+                degree[focal]++;
+                degree[target]++;
+                gravitySum -= gravity[j];
+                gravity[j] = 0;
+                break;
               }
             }
           }
@@ -408,7 +455,7 @@ public class Scenario {
     efficiency /= Main.N * (Main.N - 1D) / 2D;
   }
 
-  void initializeRank(){
+  void initializeRank() {
     setRank();
     rank0 = rank.clone();
     rank0Knowledge = rankKnowledge.clone();
@@ -421,7 +468,8 @@ public class Scenario {
     }
   }
 
-  record Candidate(int index, double weight) {}
+  record Candidate(int index, double weight) {
+  }
 
   void doLearning() {
     isNotConverged = false;
@@ -429,12 +477,12 @@ public class Scenario {
     shuffleFisherYates(focalIndexArray);
 
     for (int focal : focalIndexArray) {
-        if (numTransferred[focal] < Main.MAX_TRANSFER) {
+      if (numTransferred[focal] < Main.MAX_TRANSFER) {
         List<Candidate> candidates = new ArrayList<>();
         double weightSum = 0;
         shuffleFisherYates(neighborList[focal]);
         for (int target : neighborList[focal]) {
-          if( numTransferred[target] >= Main.MAX_TRANSFER || r.nextDouble() >= Main.P_ACCEPT ){
+          if (numTransferred[target] >= Main.MAX_TRANSFER || Main.P_ACCEPT < r.nextDouble()) {
             continue;
           }
           double diff = knowledge[focal] - knowledge[target];
@@ -443,7 +491,7 @@ public class Scenario {
           }
           diff = FastMath.abs(diff);
           double w = (knowledge[focal] > knowledge[target]) ? diff * pSharingOf[focal] : diff * (1D - pSharingOf[focal]);
-          if( w > 0 ){
+          if (w > 0) {
             candidates.add(new Candidate(target, w));
             weightSum += w;
           }
@@ -495,14 +543,14 @@ public class Scenario {
     buffer.or(belief[focal]);
     buffer.xor(reality);
     nCorrectBelief[focal] = buffer.cardinality();
-    if( Main.S != 1 ){
+    if (Main.S != 1) {
       for (int m = 0; m < Main.M; m += Main.S) {
         int mismatchIndex = buffer.nextSetBit(m);
         if (mismatchIndex == -1 || mismatchIndex >= m + Main.S) {
           knowledgeFocal += Main.S;
         }
       }
-    }else{
+    } else {
       knowledgeFocal = nCorrectBelief[focal];
     }
     knowledge[focal] = knowledgeFocal;
@@ -575,10 +623,10 @@ public class Scenario {
         beliefDiversity += getBitDifferenceCount(beliefFocal, belief[target]);
       }
     }
-    beliefDiversity /= Main.M_N;
+    beliefDiversity /= Main.M_N_PAIR;
   }
 
-  int getBitDifferenceCount(BitSet a, BitSet b){
+  int getBitDifferenceCount(BitSet a, BitSet b) {
     buffer.clear();
     buffer.or(a);
     buffer.xor(b);

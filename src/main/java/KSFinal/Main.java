@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 5000;
+  static int ITERATION = 2000;
   static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
@@ -21,12 +21,12 @@ public class Main {
   static final boolean GET_MAT = true;
 
 //  static final int MAX_TRANSFER = 100;
-  static final int MAX_TRANSFER = 5;
+  static final int MAX_TRANSFER = 2;
 
   //Global Parameters
-  static int M = 500;
-  static int S = 1;
-  static int TIME = 1000 + 1;
+  static int M = 100;
+  static int S = 5;
+  static int TIME = 300 + 1;
 
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -35,8 +35,12 @@ public class Main {
     put(2, "Preferential Attachment");
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
-  static int N_OF_GROUP = 10;
-  static int N_IN_GROUP = 15; // * Should be an odd number
+  static int N_OF_GROUP = 5;
+  static int N_IN_GROUP = 20;
+  static int N0 = 20;
+  static int L = 1000;
+  static int Z = N_IN_GROUP-1;
+  static int ALPHA_MAX = 5;
   static int N = N_OF_GROUP * N_IN_GROUP;
 
   //Moving Params
@@ -59,10 +63,11 @@ public class Main {
   static int LENGTH_P_SHARING = P_SHARING.length;
 
   static double P_ACCEPT = 1.0;
-  static double P_LEARNING = .2;
+  static double P_LEARNING = .3;
 
   //Instrumental Params
   static double M_N = M * N;
+  static double M_N_PAIR = M * N * (N-1);
 
   static final int[] RESULT_KEY_VALUE = {
       LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
