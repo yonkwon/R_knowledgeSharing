@@ -2,9 +2,8 @@ package KSFinal;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -202,10 +201,7 @@ public class Scenario {
 
   void initializeNetwork() {
     network = new BitSet[Main.N];
-    neighborList = new ArrayList[Main.N];
     degree = new int[Main.N];
-    float[][] shortestDistance; // faster than double[][]
-    boolean[] isPresent;
     efficiency = 0;
     groupOf = new int[Main.N];
     for (int n = 0; n < Main.N; n++) {
@@ -214,199 +210,24 @@ public class Scenario {
     }
     switch (networkType) {
       case 0:
-        // Random spanning tree
-        isPresent = new boolean[Main.N];
-        shuffleFisherYates(focalIndexArray);
-        isPresent[focalIndexArray[0]] = true;
-        isPresent[focalIndexArray[1]] = true;
-        network[focalIndexArray[0]].set(focalIndexArray[1]);
-        network[focalIndexArray[1]].set(focalIndexArray[0]);
-        degree[focalIndexArray[0]]++;
-        degree[focalIndexArray[1]]++;
-        for (int focal : focalIndexArray) {
-          if (isPresent[focal]) {
-            continue;
-          }
-          shuffleFisherYates(targetIndexArray);
-          for (int target2Link : targetIndexArray) {
-            if (isPresent[target2Link]) {
-              isPresent[focal] = true;
-              network[focal].set(target2Link);
-              network[target2Link].set(focal);
-              degree[focal]++;
-              degree[target2Link]++;
-              break;
-            }
-          }
-        }
-        for (int focal : focalIndexArray) {
-          for (int target = focal; target < Main.N; target++) {
-            if (focal == target || network[focal].get(target)) {
-              continue;
-            }
-            if (r.nextDouble() < beta) {
-              network[focal].set(target);
-              network[target].set(focal);
-              degree[focal]++;
-              degree[target]++;
-            }
-          }
-        }
+        initializeNetworkRandomSpanningTree();
         break;
       case 1:
         // Cavemen
-        for (int group = 0; group < Main.N_OF_GROUP; group++) {
-          for (int focalInGroup = 0; focalInGroup < Main.N_IN_GROUP; focalInGroup++) {
-            int focal = group * Main.N_IN_GROUP + focalInGroup;
-            groupOf[focal] = group;
-            degree[focal] = Main.N_IN_GROUP - 1;
-            for (int targetInGroup = 0; targetInGroup < Main.N_IN_GROUP; targetInGroup++) {
-              int target = group * Main.N_IN_GROUP + targetInGroup;
-              if (focal == target) {
-                continue;
-              }
-              network[focal].set(target);
-              network[target].set(focal);
-            }
-          }
-        }
-        //Limited spanning between group
-        for (int group = 0; group < Main.N_OF_GROUP; group++) {
-          int firstInThisGroup = group * Main.N_IN_GROUP; // First one in each group
-          int secondInThisGroup = firstInThisGroup + 1; // Second one in each group
-          int firstInNextGroup = (firstInThisGroup + Main.N_IN_GROUP) % Main.N; //First one in the next group
-          network[firstInThisGroup].clear(secondInThisGroup);
-          network[secondInThisGroup].clear(firstInThisGroup);
-          network[secondInThisGroup].set(firstInNextGroup);
-          network[firstInNextGroup].set(secondInThisGroup);
-        }
-        //Rewiring
-        shuffleFisherYates(focalIndexArray);
-        for (int focal : focalIndexArray) {
-          int focalGroup = groupOf[focal];
-          int inUnitLast = (focalGroup + 1) * Main.N_IN_GROUP;
-          for (int targetInUnit = focalGroup * Main.N_IN_GROUP; targetInUnit < inUnitLast; targetInUnit++) {
-            if (network[focal].get(targetInUnit) && degree[targetInUnit] > 1 && r.nextDouble() < beta / Main.GAMMA) {
-              shuffleFisherYates(targetIndexArray);
-              for (int targetOutUnit : targetIndexArray) {
-                if (!network[focal].get(targetOutUnit) && focalGroup != groupOf[targetOutUnit]) {
-                  network[focal].clear(targetInUnit);
-                  network[targetInUnit].clear(focal);
-                  network[focal].set(targetOutUnit);
-                  network[targetOutUnit].set(focal);
-                  degree[targetInUnit]--;
-                  degree[targetOutUnit]++;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        for( int n = 0; n < Main.N; n ++ ){
-          if( degree[n] == 0 ){
-            System.out.println("network broken at "+n);
-          }
-        }
+        initializeNetworkConnectedCavemen();
         break;
       case 2: // Preferential Attachment
-        //Starting lattice
-        int[] positionOf = new int[Main.N];
-        List<Integer> positionList = new ArrayList<>();
-        for( int p = 0; p < Main.L; p ++ ){
-          positionList.add(p);
-        }
-        shuffleFisherYates(positionList);
-        //Initial N0 assignment
-        shuffleFisherYates(focalIndexArray);
-        for( int n = 0; n < Main.N0;  n ++){
-          int focal = focalIndexArray[n];
-          int position = positionList.get(n);
-          positionOf[focal] = position;
-        }
-        //Distance between initial N0 individuals
-        int[][] distanceN0 = new int[Main.N0][Main.N0];
-        for( int i = 0; i < Main.N0; i ++ ){
-          for( int j = i+1; j < Main.N0; j ++ ) {
-            int focal = focalIndexArray[i];
-            int target = focalIndexArray[j];
-            int positionFocal = positionOf[focal];
-            int positionTarget = positionOf[target];
-            int diff = Math.abs(positionFocal - positionTarget);
-            distanceN0[i][j] = FastMath.min(Main.L - diff, diff);
-            distanceN0[j][i] = FastMath.min(Main.L - diff, diff);
-          }
-        }
-        //Initial two connections
-        for( int i = 0; i < Main.N0; i ++){
-          int focal = focalIndexArray[i];
-          int[] distanceN0Focal = distanceN0[i];
-          int firstMinTargetIndex = -1;
-          int secondMinTargetIndex = -1;
-          double firstMinDistance = Double.MAX_VALUE;
-          double secondMinDistance = Double.MAX_VALUE;
-          for( int j = 0; j < Main.N0; j ++ ) {
-            if( i == j ){
-              continue;
-            }
-            int distanceToTarget = distanceN0Focal[j];
-            if (distanceToTarget < firstMinDistance) {
-              secondMinDistance = firstMinDistance;
-              secondMinTargetIndex = firstMinTargetIndex;
-              firstMinDistance = distanceToTarget;
-              firstMinTargetIndex = j;
-            } else if (distanceToTarget < secondMinDistance) {
-              secondMinDistance = distanceToTarget;
-              secondMinTargetIndex = j;
-            }
-          }
-          int target0 = focalIndexArray[firstMinTargetIndex];
-          int target1 = focalIndexArray[secondMinTargetIndex];
-          if( !network[focal].get(target0) ){
-            network[focal].set(target0);
-            network[target0].set(focal);
-            degree[focal]++;
-            degree[target0]++;
-          }
-          if( !network[focal].get(target1) ){
-            network[focal].set(target1);
-            network[target1].set(focal);
-            degree[focal]++;
-            degree[target1]++;
-          }
-        }
-        // Add remaining individuals
-        for( int i = Main.N0; i < Main.N; i ++ ){
-          int focal = focalIndexArray[i];
-          int positionFocal = positionList.get(i);
-          double[] gravity = new double[i];
-          double gravitySum = 0;
-          for( int j = 0; j < i; j ++ ){
-            int target = focalIndexArray[j];
-            int positionTarget = positionList.get(j);
-            int degreeTarget = degree[target];
-            int diff = FastMath.abs(positionFocal - positionTarget);
-            int dist = FastMath.min(Main.L - diff, diff);
-            gravity[j] = degreeTarget * FastMath.pow(dist, beta*Main.ALPHA_MAX);
-            gravitySum += gravity[j];
-          }
-          for( int z = 0; z < Main.Z; z ++ ){
-            double marker = r.nextDouble();
-            double acc = 0;
-            for( int j = 0; j < i; j ++ ){
-              acc += gravity[j] / gravitySum;
-              if( acc > marker ){
-                int target = focalIndexArray[j];
-                network[focal].set(target);
-                network[target].set(focal);
-                degree[focal]++;
-                degree[target]++;
-                gravitySum -= gravity[j];
-                gravity[j] = 0;
-                break;
-              }
-            }
-          }
-        }
+        initializeNetworkXulviBrunetSokolov();
+        break;
+    }
+    setNeighborList();
+    setEfficiency();
+  }
+
+  void setNeighborList() {
+    neighborList = new ArrayList[Main.N];
+    for (int n = 0; n < Main.N; n++) {
+      neighborList[n] = new ArrayList<>();
     }
     for (int i = 0; i < Main.N; i++) {
       for (int j = network[i].nextSetBit(i + 1); j >= 0; j = network[i].nextSetBit(j + 1)) {
@@ -414,8 +235,186 @@ public class Scenario {
         neighborList[j].add(i);
       }
     }
+  }
 
-    shortestDistance = new float[Main.N][Main.N];
+  void initializeNetworkRandomSpanningTree() {
+    // Random spanning tree
+    boolean[] isPresent = new boolean[Main.N];
+    shuffleFisherYates(focalIndexArray);
+    isPresent[focalIndexArray[0]] = true;
+    isPresent[focalIndexArray[1]] = true;
+    network[focalIndexArray[0]].set(focalIndexArray[1]);
+    network[focalIndexArray[1]].set(focalIndexArray[0]);
+    degree[focalIndexArray[0]]++;
+    degree[focalIndexArray[1]]++;
+    for (int focal : focalIndexArray) {
+      if (isPresent[focal]) {
+        continue;
+      }
+      shuffleFisherYates(targetIndexArray);
+      for (int target2Link : targetIndexArray) {
+        if (isPresent[target2Link]) {
+          isPresent[focal] = true;
+          network[focal].set(target2Link);
+          network[target2Link].set(focal);
+          degree[focal]++;
+          degree[target2Link]++;
+          break;
+        }
+      }
+    }
+    for (int focal : focalIndexArray) {
+      for (int target = focal; target < Main.N; target++) {
+        if (focal == target || network[focal].get(target)) {
+          continue;
+        }
+        if (r.nextDouble() < beta) {
+          network[focal].set(target);
+          network[target].set(focal);
+          degree[focal]++;
+          degree[target]++;
+        }
+      }
+    }
+  }
+
+  void initializeNetworkConnectedCavemen() {
+    for (int group = 0; group < Main.N_OF_GROUP; group++) {
+      for (int focalInGroup = 0; focalInGroup < Main.N_IN_GROUP; focalInGroup++) {
+        int focal = group * Main.N_IN_GROUP + focalInGroup;
+        groupOf[focal] = group;
+        for (int targetInGroup = 0; targetInGroup < Main.N_IN_GROUP; targetInGroup++) {
+          int target = group * Main.N_IN_GROUP + targetInGroup;
+          if (focal == target) {
+            continue;
+          }
+          doConnect(focal, target);
+        }
+      }
+    }
+    //Limited spanning between group
+    for (int group = 0; group < Main.N_OF_GROUP; group++) {
+      int firstInThisGroup = group * Main.N_IN_GROUP; // First one in each group
+      int secondInThisGroup = firstInThisGroup + 1; // Second one in each group
+      int firstInNextGroup = (firstInThisGroup + Main.N_IN_GROUP) % Main.N; //First one in the next group
+      doBreak(firstInThisGroup, secondInThisGroup);
+      doConnect(secondInThisGroup, firstInNextGroup);
+    }
+    //Rewiring
+    shuffleFisherYates(focalIndexArray);
+    for (int focal : focalIndexArray) {
+      int focalGroup = groupOf[focal];
+      int inUnitLast = (focalGroup + 1) * Main.N_IN_GROUP;
+      for (int targetInUnit = focalGroup * Main.N_IN_GROUP; targetInUnit < inUnitLast; targetInUnit++) {
+        if (network[focal].get(targetInUnit) && degree[targetInUnit] > 1 && r.nextDouble() < beta / Main.GAMMA) {
+          shuffleFisherYates(targetIndexArray);
+          for (int targetOutUnit : targetIndexArray) {
+            if (!network[focal].get(targetOutUnit) && focalGroup != groupOf[targetOutUnit]) {
+              doBreak(focal, targetInUnit);
+              doConnect(focal, targetOutUnit);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void initializeNetworkXulviBrunetSokolov() {
+    int[] positions = new int[Main.L];
+    int[] positionOf = new int[Main.N];
+    int[][] distance = new int[Main.N][Main.N];
+    //Assigning position on the lattice to all individuals
+    for (int l = 0; l < Main.L; l++) {
+      positions[l] = l;
+    }
+    shuffleFisherYates(positions);
+    for (int n = 0; n < Main.N; n++) {
+      positionOf[n] = positions[n];
+    }
+    //Computing distance between all individuals
+    for (int focal = 0; focal < Main.N; focal++) {
+      int positionFocal = positionOf[focal];
+      for (int target = focal + 1; target < Main.N; target++) {
+        int positionTarget = positionOf[target];
+        int diff = Math.abs(positionFocal - positionTarget);
+        int dist = FastMath.min(Main.L - diff, diff);
+        distance[focal][target] = dist;
+        distance[target][focal] = dist;
+      }
+    }
+    //Initial N0 shoulder-to-shoulder connections
+    shuffleFisherYates(focalIndexArray);
+    // Packing by pos << 32 | i (* Warning: L should be smaller than 2^32)
+    long[] pack = new long[Main.N0];
+    for (int i = 0; i < Main.N0; i++) {
+      int focal = focalIndexArray[i];
+      int position = positionOf[focal];
+      pack[i] = (((long) position) << 32) | (i & 0xffffffffL);
+    }
+    Arrays.sort(pack); // primitive long[] dual-pivot quicksort; Sorted by position
+    int first = (int) (pack[0] & 0xFFFF_FFFFL);
+    int prev = first;
+    for (int i = 1; i < Main.N0; i++) {
+      int next = (int) (pack[i] & 0xFFFF_FFFFL);
+      int a = focalIndexArray[prev];
+      int b = focalIndexArray[next];
+      doConnect(a, b);
+      prev = next;
+    }
+    // Close the ring
+    doConnect(focalIndexArray[prev], focalIndexArray[first]);
+    // Add remaining individuals
+    for (int i = Main.N0; i < Main.N; i++) {
+      int focal = focalIndexArray[i];
+      double[] weight = new double[i];
+      double weightSum = 0;
+      for (int j = 0; j < i; j++) {
+        int target = focalIndexArray[j];
+        int dist = distance[focal][target];
+        int degreeTarget = degree[target];
+        weight[j] = degreeTarget * FastMath.pow(dist, -beta * Main.ALPHA_MAX);
+        weightSum += weight[j];
+      }
+      for (int z = 0; z < Main.Z; z++) {
+        double marker = r.nextDouble() * weightSum;
+        double acc = 0.0;
+        for (int j = 0; j < i; j++) {
+          acc += weight[j];
+          if (acc >= marker) {
+            int target = focalIndexArray[j];
+            doConnect(focal, target);
+            weightSum -= weight[j];
+            weight[j] = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  void doConnect(int a, int b) {
+    if (!network[a].get(b)) {
+      network[a].set(b);
+      network[b].set(a);
+      degree[a]++;
+      degree[b]++;
+    }
+  }
+
+  void doBreak(int a, int b) {
+    if (network[a].get(b)) {
+      network[a].clear(b);
+      network[b].clear(a);
+      degree[a]--;
+      degree[b]--;
+    }
+  }
+
+  void setEfficiency() {
+    efficiency = 0;
+    float[][] shortestDistance = new float[Main.N][Main.N];
+    ; // faster than double[][]
     for (int i = 0; i < Main.N; i++) {
       for (int j = 0; j < Main.N; j++) {
         if (network[i].get(j)) {
@@ -446,7 +445,6 @@ public class Scenario {
       }
     }
 
-    efficiency = 0;
     for (int focal : focalIndexArray) {
       for (int target = focal + 1; target < Main.N; target++) {
         efficiency += 1D / shortestDistance[focal][target];
@@ -499,11 +497,11 @@ public class Scenario {
         if (weightSum == 0) {
           continue;
         }
-        double marker = r.nextDouble();
+        double marker = r.nextDouble() * weightSum;
         double acc = 0;
         for (Candidate c : candidates) {
-          acc += c.weight() / weightSum;
-          if (acc > marker) {
+          acc += c.weight();
+          if (acc >= marker) {
             int target = c.index();
             int source = (knowledge[focal] > knowledge[target]) ? focal : target;
             int recipient = (source == focal) ? target : focal;

@@ -17,14 +17,14 @@ public class Main {
   static boolean IS_ONE_ON_ONE = true;
 
   //Output Setup
-  static final boolean GET_NET = false;
+  static final boolean GET_NET = true;
   static final boolean GET_MAT = true;
 
 //  static final int MAX_TRANSFER = 100;
-  static final int MAX_TRANSFER = 2;
+  static final int MAX_TRANSFER = 5;
 
   //Global Parameters
-  static int M = 100;
+  static int M = 200;
   static int S = 5;
   static int TIME = 300 + 1;
 
@@ -37,16 +37,15 @@ public class Main {
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
   static int N_OF_GROUP = 5;
   static int N_IN_GROUP = 20;
-  static int N0 = 20;
-  static int L = 1000;
-  static int Z = N_IN_GROUP-1;
-  static int ALPHA_MAX = 5;
+  static int N0 = 5;
+  static int L = 10000;
+  static int Z = 3; // N0 > Z
+  static int ALPHA_MAX = 100;
   static int N = N_OF_GROUP * N_IN_GROUP;
 
   //Moving Params
 //  static double[] BETA = {0, 1};
 //  static double[] BETA = new double[]{0, .1, 1};
-//  static double[] BETA = new double[]{0, .25, .5, .75, 1};
   static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
   //  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
@@ -58,12 +57,11 @@ public class Main {
 //  static double[] P_SHARING = new double[]{0, .1, 1};
   //  static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
   static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-//  static double[] P_SHARING = new double[]{0, .01, .02, .03, .04, .05, .1};
 //  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
   static double P_ACCEPT = 1.0;
-  static double P_LEARNING = .3;
+  static double P_LEARNING = .2;
 
   //Instrumental Params
   static double M_N = M * N;
