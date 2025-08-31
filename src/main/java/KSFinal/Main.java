@@ -1,6 +1,5 @@
 package KSFinal;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -8,25 +7,25 @@ import java.util.HashMap;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 2000;
+  static int ITERATION = 10000;
   static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
   static final long TIC = System.currentTimeMillis();
 
   //Key Assumptions
-  static boolean IS_RATIO = true;
-  static boolean IS_ONE_ON_ONE = true;
+  static boolean IS_RATIO = false;
+  static boolean IS_QUEUED_LEARNING = true;
 
   //Output Setup
   static final boolean GET_NET = true;
   static final boolean GET_MAT = true;
 
-//  static final int MAX_TRANSFER = 100;
+  //  static final int MAX_TRANSFER = 100;
   static final int MAX_TRANSFER = 5;
 
   //Global Parameters
-  static int M = 200;
+  static int M = 100;
   static int S = 5;
-  static int TIME = 300 + 1;
+  static int TIME = 800 + 1;
 
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -35,81 +34,80 @@ public class Main {
     put(2, "Preferential Attachment");
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
-  static int N_OF_GROUP = 5;
-  static int N_IN_GROUP = 20;
-  static int N0 = 5;
-  static int L = 10000;
-  static int Z = 3; // N0 > Z
-  static int ALPHA_MAX = 100;
+  static int N_OF_GROUP = 10;
+  static int N_IN_GROUP = 10;
+  static int Z = 5; // N0 > Z
   static int N = N_OF_GROUP * N_IN_GROUP;
 
   //Moving Params
 //  static double[] BETA = {0, 1};
 //  static double[] BETA = new double[]{0, .1, 1};
-  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-  //  static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+    static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
   static double GAMMA = 1;  //Connected cavemen scaler
-  static double TAU = 1;  //Preferential attachement scaler
 
   //  static double[] P_SHARING = new double[]{0};
-//  static double[] P_SHARING = new double[]{0, 1};
+  static double[] P_SHARING = new double[]{0, 1};
 //  static double[] P_SHARING = new double[]{0, .1, 1};
-  //  static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
-  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-//  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//    static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
+//  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
+//    static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
-  static double P_ACCEPT = 1.0;
-  static double P_LEARNING = .2;
+  static double P_ACCEPT = 1;
+  static double P_LEARNING = .3;
 
   //Instrumental Params
   static double M_N = M * N;
-  static double M_N_PAIR = M * N * (N-1);
+  static double M_N_PAIR = M * N * (N - 1);
 
   static final int[] RESULT_KEY_VALUE = {
-      LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
+    LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
   };
 
   static final int[] RESULT_KEY_VALUE_OPTIMAL = {
-      LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME
+    LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME
   };
 
   static final int[] RESULT_KEY_VALUE_RANK = {
-      LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
+    LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
   };
 
   static String RUN_ID = "KSFinal";
 
   static String PARAMS =
-      "[r"
-          + (IS_RATIO ? 1 : 0)
-          + "]"
-          + "I"
-          + ITERATION
-          + "T"
-          + TIME
-          + "MAXT"
-          + MAX_TRANSFER
-          + "N"
-          + N_OF_GROUP + "x" + N_IN_GROUP
-          + "(M"
-          + M
-          + "S"
-          + S
-          + ")"
-          + "Beta"
-          + LENGTH_BETA
-          + "Gamma"
-          + GAMMA
-          + "Tau"
-          + TAU
-          + "Ps"
-          + LENGTH_P_SHARING
-          + "Pa"
-          + P_ACCEPT
-          + "Pl"
-          + P_LEARNING;
+    "["
+      + "r"
+      + (IS_RATIO ? 1 : 0)
+      + "que"
+      + (IS_QUEUED_LEARNING ? 1 : 0)
+      + "]"
+      + "I"
+      + ITERATION
+      + "T"
+      + TIME
+      + "MAXT"
+      + MAX_TRANSFER
+      + "N"
+      + N_OF_GROUP + "x" + N_IN_GROUP
+      + "Z"
+      + Z
+      + "(M"
+      + M
+      + "S"
+      + S
+      + ")"
+      + "Beta"
+      + LENGTH_BETA
+      + "Gamma"
+      + GAMMA
+      + "Ps"
+      + LENGTH_P_SHARING
+      + "Pa"
+      + P_ACCEPT
+      + "Pl"
+      + P_LEARNING;
   static Path PATH_CSV = Paths.get(".").toAbsolutePath().normalize().resolve(RUN_ID + PARAMS);
 
   public static void main(String[] args) {

@@ -14,8 +14,8 @@ class MatWriter {
   MatWriter(Computation c) {
     File outDir;
     File outFile;
-    Matrix knowledgeAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix knowledgeSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix performanceAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix performanceSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix knowledgeBestAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix knowledgeBestSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix knowledgeBestSourceDiversityAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
@@ -50,8 +50,8 @@ class MatWriter {
         for (int t = 0; t < Main.TIME; t++) {
           for (int b = 0; b < Main.LENGTH_BETA; b++) {
             int[] indices = {nt, b, ps, t};
-            knowledgeAVG.setDouble(indices, c.knowledgeAVG[nt][ps][b][t]);
-            knowledgeSSQ.setDouble(indices, c.knowledgeSSQ[nt][ps][b][t]);
+            performanceAVG.setDouble(indices, c.knowledgeAVG[nt][ps][b][t]);
+            performanceSSQ.setDouble(indices, c.knowledgeSSQ[nt][ps][b][t]);
             knowledgeBestAVG.setDouble(indices, c.knowledgeBestAVG[nt][ps][b][t]);
             knowledgeBestSSQ.setDouble(indices, c.knowledgeBestSSQ[nt][ps][b][t]);
             knowledgeBestSourceDiversityAVG.setDouble(indices, c.knowledgeBestSourceDiversityAVG[nt][ps][b][t]);
@@ -94,7 +94,6 @@ class MatWriter {
     try {
       MatFile matFile = mat5File
                         .addArray("para_is_ratio", Mat5.newScalar(Main.IS_RATIO ? 1 : 0))
-                        .addArray("para_is_one_on_one", Mat5.newScalar(Main.IS_ONE_ON_ONE ? 1 : 0))
                         
                         .addArray("para_iteration", Mat5.newScalar(Main.ITERATION))
                         .addArray("para_time", Mat5.newScalar(Main.TIME))
@@ -106,6 +105,7 @@ class MatWriter {
                         .addArray("para_s", Mat5.newScalar(Main.S))
                         .addArray("para_p_a", Mat5.newScalar(Main.P_ACCEPT))
                         .addArray("para_p_l", Mat5.newScalar(Main.P_LEARNING))
+                        .addArray("para_maxt", Mat5.newScalar(Main.MAX_TRANSFER))
                         
                         .addArray("para_l_b", Mat5.newScalar(Main.LENGTH_BETA))
                         .addArray("para_a_b", matrixArrayBeta)
@@ -114,9 +114,8 @@ class MatWriter {
                         .addArray("para_l_net_type", Mat5.newScalar(Main.LENGTH_NETWORK_TYPE))
                         .addArray("para_a_net_type", matrixArrayNetworkType)
                         .addArray("para_alpha", Mat5.newScalar(Main.GAMMA))
-                        .addArray("para_tau", Mat5.newScalar(Main.TAU))
-                        .addArray("r_know_avg", knowledgeAVG)
-                        .addArray("r_know_ssq", knowledgeSSQ)
+                        .addArray("r_perf_avg", performanceAVG)
+                        .addArray("r_perf_ssq", performanceSSQ)
                         .addArray("r_kbst_avg", knowledgeBestAVG)
                         .addArray("r_kbst_ssq", knowledgeBestSSQ)
                         .addArray("r_kbsd_avg", knowledgeBestSourceDiversityAVG)

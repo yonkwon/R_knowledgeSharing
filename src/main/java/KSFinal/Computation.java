@@ -357,18 +357,18 @@ class Computation {
           double maxKnowledgeAvg = Double.MIN_VALUE;
           for (int b = 0; b < Main.LENGTH_BETA; b++) {
             Scenario sc = scs[b];
-            if (sc.knowledgeAvg > maxKnowledgeAvg) {
-              maxKnowledgeAvg = sc.knowledgeAvg;
+            if (sc.firmPerformance > maxKnowledgeAvg) {
+              maxKnowledgeAvg = sc.firmPerformance;
               maxKnowledgeAvgB = b;
             }
-            knowledgeAVGAtomicPart[b][t].addAndGet(sc.knowledgeAvg);
-            knowledgeSSQAtomicPart[b][t].addAndGet(pow(sc.knowledgeAvg, 2));
-            knowledgeBestAVGAtomicPart[b][t].addAndGet(sc.knowledgeBest);
-            knowledgeBestSSQAtomicPart[b][t].addAndGet(pow(sc.knowledgeBest, 2));
-            knowledgeBestSourceDiversityAVGAtomicPart[b][t].addAndGet(sc.knowledgeBestSourceDiversity);
-            knowledgeBestSourceDiversitySSQAtomicPart[b][t].addAndGet(pow(sc.knowledgeBestSourceDiversity, 2));
-            knowledgeMinMaxAVGAtomicPart[b][t].addAndGet(sc.knowledgeMinMax);
-            knowledgeMinMaxSSQAtomicPart[b][t].addAndGet(pow(sc.knowledgeMinMax, 2));
+            knowledgeAVGAtomicPart[b][t].addAndGet(sc.firmPerformance);
+            knowledgeSSQAtomicPart[b][t].addAndGet(pow(sc.firmPerformance, 2));
+//            knowledgeBestAVGAtomicPart[b][t].addAndGet(sc.knowledgeBest);
+//            knowledgeBestSSQAtomicPart[b][t].addAndGet(pow(sc.knowledgeBest, 2));
+            knowledgeBestSourceDiversityAVGAtomicPart[b][t].addAndGet(sc.beliefSourceDiversity);
+            knowledgeBestSourceDiversitySSQAtomicPart[b][t].addAndGet(pow(sc.beliefSourceDiversity, 2));
+//            knowledgeMinMaxAVGAtomicPart[b][t].addAndGet(sc.knowledgeMinMax);
+//            knowledgeMinMaxSSQAtomicPart[b][t].addAndGet(pow(sc.knowledgeMinMax, 2));
             beliefDiversityAVGAtomicPart[b][t].addAndGet(sc.beliefDiversity);
             beliefDiversitySSQAtomicPart[b][t].addAndGet(pow(sc.beliefDiversity, 2));
             beliefSourceDiversityAVGAtomicPart[b][t].addAndGet(sc.beliefSourceDiversity);
