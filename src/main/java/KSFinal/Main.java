@@ -12,7 +12,6 @@ public class Main {
   static final long TIC = System.currentTimeMillis();
 
   //Key Assumptions
-  static boolean IS_RATIO = false;
   static boolean IS_QUEUED_LEARNING = true;
 
   //Output Setup
@@ -20,12 +19,12 @@ public class Main {
   static final boolean GET_MAT = true;
 
   //  static final int MAX_TRANSFER = 100;
-  static final int MAX_TRANSFER = 5;
+  static final int N_TRANSFER = 5;
 
   //Global Parameters
   static int M = 100;
   static int S = 5;
-  static int TIME = 800 + 1;
+  static int TIME = 1000 + 1;
 
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -34,7 +33,7 @@ public class Main {
     put(2, "Preferential Attachment");
   }};
   static int LENGTH_NETWORK_TYPE = NETWORK_TYPE.size();
-  static int N_OF_GROUP = 10;
+  static int N_OF_GROUP = 5;
   static int N_IN_GROUP = 10;
   static int Z = 5; // N0 > Z
   static int N = N_OF_GROUP * N_IN_GROUP;
@@ -48,11 +47,11 @@ public class Main {
   static double GAMMA = 1;  //Connected cavemen scaler
 
   //  static double[] P_SHARING = new double[]{0};
-  static double[] P_SHARING = new double[]{0, 1};
+//  static double[] P_SHARING = new double[]{0, 1};
 //  static double[] P_SHARING = new double[]{0, .1, 1};
 //    static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
 //  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-//    static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+    static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
   static double P_ACCEPT = 1;
@@ -60,26 +59,24 @@ public class Main {
 
   //Instrumental Params
   static double M_N = M * N;
-  static double M_N_PAIR = M * N * (N - 1);
+  static double M_N_PAIR = (double) ((M * N * (N - 1)) / 2);
 
   static final int[] RESULT_KEY_VALUE = {
-    LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
+    2, LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME
   };
 
   static final int[] RESULT_KEY_VALUE_OPTIMAL = {
-    LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME
+    2, LENGTH_NETWORK_TYPE, LENGTH_P_SHARING, TIME
   };
 
   static final int[] RESULT_KEY_VALUE_RANK = {
-    LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
+    2, LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
   };
 
   static String RUN_ID = "KSFinal";
 
   static String PARAMS =
     "["
-      + "r"
-      + (IS_RATIO ? 1 : 0)
       + "que"
       + (IS_QUEUED_LEARNING ? 1 : 0)
       + "]"
@@ -88,7 +85,7 @@ public class Main {
       + "T"
       + TIME
       + "MAXT"
-      + MAX_TRANSFER
+      + N_TRANSFER
       + "N"
       + N_OF_GROUP + "x" + N_IN_GROUP
       + "Z"

@@ -11,16 +11,17 @@ import java.util.*;
 public class Scenario {
 
   RandomGenerator r;
-  boolean isNotConverged = true;
 
-  int[] focalIndexArray;
-  int[] targetIndexArray;
-  int[] mIndexArray;
-
+  boolean isRatio;
+  int networkType;
   double beta;
   double pSharing;
   double[] pSharingOf;
-  int networkType;
+
+  boolean isNotConverged = true;
+  int[] focalIndexArray;
+  int[] targetIndexArray;
+  int[] mIndexArray;
 
   int nSharer;
   int nSeeker;
@@ -51,11 +52,12 @@ public class Scenario {
   int[] degree;
   int[] groupOf;
 
-  double firmPerformance;
+  double performance;
   double centralization;
-  double efficiency;
+  double connectedness;
 
-  Scenario(int networkType, double beta, double pSharing) {
+  Scenario(boolean isRatio, int networkType, double beta, double pSharing) {
+    this.isRatio = isRatio;
     this.networkType = networkType;
     this.beta = beta;
     this.pSharing = pSharing;
@@ -93,7 +95,7 @@ public class Scenario {
     nCorrectBelief0 = new int[Main.N];
     nIncorrectBelief0 = new int[Main.N];
     knowledge = new int[Main.N];
-    firmPerformance = 0;
+    performance = 0;
     pSharingOf = new double[Main.N];
 
     for (int m : mIndexArray) {
@@ -113,14 +115,14 @@ public class Scenario {
     for (int focal : focalIndexArray) {
       belief0[focal] = (BitSet) belief[focal].clone();
       setKnowledgeOf(focal);
-      firmPerformance += knowledge[focal];
+      performance += knowledge[focal];
       beliefSourceCount[focal][focal] = Main.M;
     }
 
     knowledge0 = knowledge.clone();
-    firmPerformance /= Main.M_N;
+    performance /= Main.M_N;
 
-    if (Main.IS_RATIO) {
+    if (isRatio) {
       nSharer = (int) (pSharing * Main.N);
       nSeeker = Main.N - nSharer;
       shuffleFisherYates(focalIndexArray);
@@ -149,7 +151,7 @@ public class Scenario {
         break;
     }
     setNeighborList();
-    efficiency = getEfficiency();
+    connectedness = getConnectedness();
   }
 
   void addEdge(int i, int j) {
@@ -292,7 +294,7 @@ public class Scenario {
     }
   }
 
-  double getEfficiency() {
+  double getConnectedness() {
     double total = 0;
     for (int start : focalIndexArray) {
       int[] dist = getShortestDistance(start);
@@ -351,13 +353,13 @@ public class Scenario {
     int[] numTransferred = new int[Main.N];
     shuffleFisherYates(focalIndexArray);
     for (int focal : focalIndexArray) {
-      if (numTransferred[focal] >= Main.MAX_TRANSFER) continue;
+      if (numTransferred[focal] >= Main.N_TRANSFER) continue;
       shuffleFisherYates(neighborList[focal]); //250825: THIS WAS MISSING!!! MOVE TO UPPER LEVEL WHEN CLEAR
       if (r.nextDouble() < pSharingOf[focal]) {
         //Focal is knowledge sharer
         for (int target : neighborList[focal]) {
           if (knowledge[focal] > knowledge[target]) {
-            if (numTransferred[target] < Main.MAX_TRANSFER && r.nextDouble() < Main.P_ACCEPT) {
+            if (numTransferred[target] < Main.N_TRANSFER && r.nextDouble() < Main.P_ACCEPT) {
               doKnoweldgeTransfer(focal, target);
               numTransferred[focal]++;
               numTransferred[target]++;
@@ -370,7 +372,7 @@ public class Scenario {
         for (int target : neighborList[focal]) {
           if (network[focal].get(target) && knowledge[focal] < knowledge[target]) {
             isNotConverged = true;
-            if (numTransferred[target] < Main.MAX_TRANSFER && r.nextDouble() < Main.P_ACCEPT) {
+            if (numTransferred[target] < Main.N_TRANSFER && r.nextDouble() < Main.P_ACCEPT) {
               doKnoweldgeTransfer(target, focal);
               numTransferred[focal]++; //250825FIX: THE FOLLOWING LINES WERE OUTSIDE OF THE IF BRACKET
               numTransferred[target]++;
@@ -409,8 +411,8 @@ public class Scenario {
     List<int[]> ops = new ArrayList<>();
     for (int[] pr : queue) {
       int from = pr[0], to = pr[1];
-      if (numTransferred[from] < Main.MAX_TRANSFER &&
-        numTransferred[to] < Main.MAX_TRANSFER &&
+      if (numTransferred[from] < Main.N_TRANSFER &&
+        numTransferred[to] < Main.N_TRANSFER &&
         r.nextDouble() < Main.P_ACCEPT) {
         ops.add(pr);
         numTransferred[from]++;
@@ -484,17 +486,17 @@ public class Scenario {
   }
 
   void setFirmPerformance() {
-    firmPerformance = 0;
-    for (int focal : focalIndexArray) firmPerformance += knowledge[focal];
-    firmPerformance /= Main.M_N;
+    performance = 0;
+    for (int focal : focalIndexArray) performance += knowledge[focal];
+    performance /= Main.M_N;
   }
 
   void setBeliefDiversity() {
     long diffSum = 0;
-    for (int i = 0; i < Main.N; i++) {
-      for (int j = i + 1; j < Main.N; j++) {
-        BitSet diff = (BitSet) belief[i].clone();
-        diff.xor(belief[j]);
+    for (int focal : focalIndexArray) {
+      for (int target = focal + 1; target < Main.N; target++) {
+        BitSet diff = (BitSet) belief[focal].clone();
+        diff.xor(belief[target]);
         diffSum += diff.cardinality();
       }
     }
@@ -576,16 +578,16 @@ public class Scenario {
         for (int target = 0; target < Main.N; target++) {
           if (focal == target) continue;
           sb.append(focal).append(",")
-                  .append(target).append(",")
-                  .append(groupOf[focal]).append(",")
-                  .append(pSharingOf[focal]).append(",")
-                  .append(knowledge0[focal] / (double) Main.M).append(",")
-                  .append(contributionOf[focal]).append(",")
-                  .append(contributionOfPositive[focal]).append(",")
-                  .append(contributionOfNegative[focal]).append(",")
-                  .append(network[focal].get(target) ? 1 : 0).append(",")
-                  .append(degree[focal]).append(",")
-                  .append(beliefSourceCount[target][focal] / (double) Main.M).append("\n");
+            .append(target).append(",")
+            .append(groupOf[focal]).append(",")
+            .append(pSharingOf[focal]).append(",")
+            .append(knowledge0[focal] / (double) Main.M).append(",")
+            .append(contributionOf[focal]).append(",")
+            .append(contributionOfPositive[focal]).append(",")
+            .append(contributionOfNegative[focal]).append(",")
+            .append(network[focal].get(target) ? 1 : 0).append(",")
+            .append(degree[focal]).append(",")
+            .append(beliefSourceCount[target][focal] / (double) Main.M).append("\n");
         }
       }
       bw.write(sb.toString());
