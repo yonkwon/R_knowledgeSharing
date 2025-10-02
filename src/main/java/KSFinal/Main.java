@@ -7,12 +7,9 @@ import java.util.HashMap;
 public class Main {
 
   //Computation Parameters
-  static int ITERATION = 10000;
+  static int ITERATION = 1000;
   static final int SHARDS = 256; // Count of striped locks; Use a power of two
   static final long TIC = System.currentTimeMillis();
-
-  //Key Assumptions
-  static boolean IS_QUEUED_LEARNING = true;
 
   //Output Setup
   static final boolean GET_NET = false;
@@ -70,12 +67,10 @@ public class Main {
     2, LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
   };
 
-  static String RUN_ID = "KSFinal";
+  static String RUN_ID = "KSMech";
 
   static String PARAMS =
     "["
-      + "que"
-      + (IS_QUEUED_LEARNING ? 1 : 0)
       + "]"
       + "I"
       + ITERATION

@@ -31,6 +31,10 @@ class MatWriter {
     Matrix centralizationSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix connectednessAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix connectednessSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix potentialExposureAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix potentialExposureSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix effectiveExposureAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix effectiveExposureSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix optimalBetaAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_OPTIMAL);
     Matrix optimalBetaSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE_OPTIMAL);
     Matrix rankContributionAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
@@ -68,6 +72,10 @@ class MatWriter {
               centralizationSSQ.setDouble(indices, c.centralizationSSQ[isRatioIdx][nt][ps][b][t]);
               connectednessAVG.setDouble(indices, c.connectednessAVG[isRatioIdx][nt][ps][b][t]);
               connectednessSSQ.setDouble(indices, c.connectednessSSQ[isRatioIdx][nt][ps][b][t]);
+              potentialExposureAVG.setDouble(indices, c.potentialExposureAVG[isRatioIdx][nt][ps][b][t]);
+              potentialExposureSSQ.setDouble(indices, c.potentialExposureSSQ[isRatioIdx][nt][ps][b][t]);
+              effectiveExposureAVG.setDouble(indices, c.effectiveExposureAVG[isRatioIdx][nt][ps][b][t]);
+              effectiveExposureSSQ.setDouble(indices, c.effectiveExposureSSQ[isRatioIdx][nt][ps][b][t]);
               for (int n = 0; n < Main.N; n++) {
                 int[] indicesRank = {isRatioIdx, nt, b, ps, t, n};
                 rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[isRatioIdx][nt][ps][b][t][n]);
@@ -132,6 +140,10 @@ class MatWriter {
         .addArray("r_conn_ssq", connectednessSSQ)
         .addArray("r_opti_avg", optimalBetaAVG)
         .addArray("r_opti_ssq", optimalBetaSSQ)
+        .addArray("r_expp_avg", potentialExposureAVG)
+        .addArray("r_expp_ssq", potentialExposureSSQ)
+        .addArray("r_expe_avg", effectiveExposureAVG)
+        .addArray("r_expe_ssq", effectiveExposureSSQ)
         .addArray("r_r_cont_avg", rankContributionAVG)
         .addArray("r_r_cont_ssq", rankContributionSSQ)
         .addArray("r_r_conp_avg", rankContributionPositiveAVG)

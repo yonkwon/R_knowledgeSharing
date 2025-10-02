@@ -36,6 +36,13 @@ public class Scenario {
   int[] nCorrectBelief0;
   int[] nIncorrectBelief0;
 
+  boolean[][][] isExposedToSourcePotential;
+  boolean[][][] isExposedToSourceEffective;
+  int[][] countPotentialExposure;
+  int[][] countEffectiveExposure;
+  double potentialExposure;
+  double effectiveExposure;
+
   int[] knowledge;
   int[] knowledge0;
   double[] contributionOf;
@@ -334,7 +341,7 @@ public class Scenario {
   boolean getConvergence() {
     for (int focal = 0; focal < Main.N; focal++) {
       int focalKnowledge = knowledge[focal];
-      for (int target = network[focal].nextSetBit(focal + 1); target >= 0; target = network[focal].nextSetBit(target + 1)) {
+      for (int target : neighborList[focal] ) {
         if (focalKnowledge != knowledge[target]) return false;
       }
     }
@@ -342,89 +349,78 @@ public class Scenario {
   }
 
   void doLearning() {
-    if (Main.IS_QUEUED_LEARNING) {
-      doLearningQueue();
-    } else {
-      doLearningRandom();
-    }
-  }
-
-  void doLearningRandom() {
     int[] numTransferred = new int[Main.N];
-    shuffleFisherYates(focalIndexArray);
-    for (int focal : focalIndexArray) {
-      if (numTransferred[focal] >= Main.T_MAX) continue;
-      shuffleFisherYates(neighborList[focal]); //250825: THIS WAS MISSING!!! MOVE TO UPPER LEVEL WHEN CLEAR
-      if (r.nextDouble() < pSharingOf[focal]) {
-        //Focal is knowledge sharer
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] > knowledge[target]) {
-            if (numTransferred[target] < Main.T_MAX) {
-              doKnoweldgeTransfer(focal, target);
-              numTransferred[focal]++;
-              numTransferred[target]++;
-              break;
-            }
-          }
-        }
-      } else {
-        //Focal is knowledge seeker
-        for (int target : neighborList[focal]) {
-          if (network[focal].get(target) && knowledge[focal] < knowledge[target]) {
-            isNotConverged = true;
-            if (numTransferred[target] < Main.T_MAX) {
-              doKnoweldgeTransfer(target, focal);
-              numTransferred[focal]++; //250825FIX: THE FOLLOWING LINES WERE OUTSIDE OF THE IF BRACKET
-              numTransferred[target]++;
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-
-  void doLearningQueue() {
-    int[] numTransferred = new int[Main.N];
+    isExposedToSourceEffective = new boolean[Main.N][Main.M][Main.N];
+    isExposedToSourcePotential = new boolean[Main.N][Main.M][Main.N];
+    countPotentialExposure = new int[Main.N][Main.M];
+    countEffectiveExposure = new int[Main.N][Main.M];
     List<int[]> queue = new ArrayList<>();
     shuffleFisherYates(focalIndexArray);
     for (int focal : focalIndexArray) {
+      List<int[]> candidate = new ArrayList<>();
       shuffleFisherYates(neighborList[focal]);
       if (r.nextDouble() < pSharingOf[focal]) {
         for (int target : neighborList[focal]) {
+          for( int m : mIndexArray ){
+            isExposedToSourcePotential[target][m][beliefSource[focal][m]] = true;
+          }
           if (knowledge[focal] > knowledge[target]) {
-            queue.add(new int[]{focal, target});
-            break;
+            for( int m : mIndexArray ){
+              isExposedToSourceEffective[target][m][beliefSource[focal][m]] = true;
+            }
+            candidate.add(new int[]{focal, target});
           }
         }
       } else {
         for (int target : neighborList[focal]) {
+          for( int m : mIndexArray ){
+            isExposedToSourcePotential[focal][m][beliefSource[target][m]] = true;
+          }
           if (knowledge[focal] < knowledge[target]) {
-            queue.add(new int[]{target, focal});
-            break;
+            for( int m : mIndexArray ){
+              isExposedToSourceEffective[focal][m][beliefSource[target][m]] = true;
+            }
+            candidate.add(new int[]{target, focal});
+          }
+        }
+      }
+      if(!candidate.isEmpty()){
+        int idx = r.nextInt(candidate.size());
+        queue.add(candidate.get(idx));
+      }
+    }
+
+    for( int focal : focalIndexArray ){
+      for( int m : mIndexArray ){
+        for( int target : targetIndexArray ){
+          if( isExposedToSourcePotential[focal][m][target] ){
+            countPotentialExposure[focal][m] ++;
+          }
+          if( isExposedToSourceEffective[focal][m][target] ){
+            countEffectiveExposure[focal][m] ++;
           }
         }
       }
     }
+
     Collections.shuffle(queue); // added later
     List<int[]> ops = new ArrayList<>();
-    for (int[] pr : queue) {
-      int from = pr[0], to = pr[1];
+    for (int[] q : queue) {
+      int from = q[0], to = q[1];
       if (numTransferred[from] < Main.T_MAX &&
         numTransferred[to] < Main.T_MAX) {
-        ops.add(pr);
+        ops.add(q);
         numTransferred[from]++;
         numTransferred[to]++;
       }
     }
 
     for (int[] op : ops) {
-      doKnoweldgeTransfer(op[0], op[1]);
+      doKnowledgeTransfer(op[0], op[1]);
     }
   }
 
-  void doKnoweldgeTransfer(int source, int recipient) {
+  void doKnowledgeTransfer(int source, int recipient) {
     BitSet diff = (BitSet) belief[source].clone();
     diff.xor(belief[recipient]);
     for (int m = diff.nextSetBit(0); m >= 0; m = diff.nextSetBit(m + 1)) {
@@ -482,6 +478,7 @@ public class Scenario {
     setBeliefSourceDiversity();
     setContribution();
     setCentralization();
+    setExposure();
   }
 
   void setFirmPerformance() {
@@ -556,6 +553,19 @@ public class Scenario {
       centralization += (maxCentrality - centrality[focal]);
     }
     centralization /= (Main.N - 1);
+  }
+
+  void setExposure(){
+    potentialExposure = 0;
+    effectiveExposure = 0;
+    for( int focal : focalIndexArray ){
+      for( int m : mIndexArray ){
+        potentialExposure += countPotentialExposure[focal][m];
+        effectiveExposure += countEffectiveExposure[focal][m];
+      }
+    }
+    potentialExposure /= Main.M_N;
+    effectiveExposure /= Main.M_N;
   }
 
   void shuffleFisherYates(int[] arr) {
