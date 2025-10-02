@@ -8,21 +8,20 @@ public class Main {
 
   //Computation Parameters
   static int ITERATION = 10000;
-  static final int NUM_THREAD = Runtime.getRuntime().availableProcessors();
+  static final int SHARDS = 256; // Count of striped locks; Use a power of two
   static final long TIC = System.currentTimeMillis();
 
   //Key Assumptions
   static boolean IS_QUEUED_LEARNING = true;
 
   //Output Setup
-  static final boolean GET_NET = true;
+  static final boolean GET_NET = false;
   static final boolean GET_MAT = true;
 
-  //  static final int MAX_TRANSFER = 100;
-  static final int N_TRANSFER = 5;
+  static final int T_MAX = 1;
 
   //Global Parameters
-  static int M = 100;
+  static int M = 200;
   static int S = 5;
   static int TIME = 1000 + 1;
 
@@ -46,15 +45,13 @@ public class Main {
   static int LENGTH_BETA = BETA.length;
   static double GAMMA = 1;  //Connected cavemen scaler
 
-  //  static double[] P_SHARING = new double[]{0};
-//  static double[] P_SHARING = new double[]{0, 1};
+  static double[] P_SHARING = new double[]{0, 1};
 //  static double[] P_SHARING = new double[]{0, .1, 1};
 //    static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
 //  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-    static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//    static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
-  static double P_ACCEPT = 1;
   static double P_LEARNING = .3;
 
   //Instrumental Params
@@ -85,7 +82,7 @@ public class Main {
       + "T"
       + TIME
       + "MAXT"
-      + N_TRANSFER
+      + T_MAX
       + "N"
       + N_OF_GROUP + "x" + N_IN_GROUP
       + "Z"
@@ -101,8 +98,6 @@ public class Main {
       + GAMMA
       + "Ps"
       + LENGTH_P_SHARING
-      + "Pa"
-      + P_ACCEPT
       + "Pl"
       + P_LEARNING;
   static Path PATH_CSV = Paths.get(".").toAbsolutePath().normalize().resolve(RUN_ID + PARAMS);

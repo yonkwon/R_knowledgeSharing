@@ -66,8 +66,8 @@ class MatWriter {
               beliefSourceDiversitySSQ.setDouble(indices, c.beliefSourceDiversitySSQ[isRatioIdx][nt][ps][b][t]);
               centralizationAVG.setDouble(indices, c.centralizationAVG[isRatioIdx][nt][ps][b][t]);
               centralizationSSQ.setDouble(indices, c.centralizationSSQ[isRatioIdx][nt][ps][b][t]);
-              connectednessAVG.setDouble(indices, c.efficiencyAVG[isRatioIdx][nt][ps][b][t]);
-              connectednessSSQ.setDouble(indices, c.efficiencySSQ[isRatioIdx][nt][ps][b][t]);
+              connectednessAVG.setDouble(indices, c.connectednessAVG[isRatioIdx][nt][ps][b][t]);
+              connectednessSSQ.setDouble(indices, c.connectednessSSQ[isRatioIdx][nt][ps][b][t]);
               for (int n = 0; n < Main.N; n++) {
                 int[] indicesRank = {isRatioIdx, nt, b, ps, t, n};
                 rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[isRatioIdx][nt][ps][b][t][n]);
@@ -104,9 +104,8 @@ class MatWriter {
         .addArray("para_n_of", Mat5.newScalar(Main.N_OF_GROUP))
         .addArray("para_m", Mat5.newScalar(Main.M))
         .addArray("para_s", Mat5.newScalar(Main.S))
-        .addArray("para_p_a", Mat5.newScalar(Main.P_ACCEPT))
         .addArray("para_p_l", Mat5.newScalar(Main.P_LEARNING))
-        .addArray("para_n_transfer", Mat5.newScalar(Main.N_TRANSFER))
+        .addArray("para_t_max", Mat5.newScalar(Main.T_MAX))
 
         .addArray("para_l_b", Mat5.newScalar(Main.LENGTH_BETA))
         .addArray("para_a_b", matrixArrayBeta)

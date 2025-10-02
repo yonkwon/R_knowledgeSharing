@@ -353,13 +353,13 @@ public class Scenario {
     int[] numTransferred = new int[Main.N];
     shuffleFisherYates(focalIndexArray);
     for (int focal : focalIndexArray) {
-      if (numTransferred[focal] >= Main.N_TRANSFER) continue;
+      if (numTransferred[focal] >= Main.T_MAX) continue;
       shuffleFisherYates(neighborList[focal]); //250825: THIS WAS MISSING!!! MOVE TO UPPER LEVEL WHEN CLEAR
       if (r.nextDouble() < pSharingOf[focal]) {
         //Focal is knowledge sharer
         for (int target : neighborList[focal]) {
           if (knowledge[focal] > knowledge[target]) {
-            if (numTransferred[target] < Main.N_TRANSFER && r.nextDouble() < Main.P_ACCEPT) {
+            if (numTransferred[target] < Main.T_MAX) {
               doKnoweldgeTransfer(focal, target);
               numTransferred[focal]++;
               numTransferred[target]++;
@@ -372,7 +372,7 @@ public class Scenario {
         for (int target : neighborList[focal]) {
           if (network[focal].get(target) && knowledge[focal] < knowledge[target]) {
             isNotConverged = true;
-            if (numTransferred[target] < Main.N_TRANSFER && r.nextDouble() < Main.P_ACCEPT) {
+            if (numTransferred[target] < Main.T_MAX) {
               doKnoweldgeTransfer(target, focal);
               numTransferred[focal]++; //250825FIX: THE FOLLOWING LINES WERE OUTSIDE OF THE IF BRACKET
               numTransferred[target]++;
@@ -411,9 +411,8 @@ public class Scenario {
     List<int[]> ops = new ArrayList<>();
     for (int[] pr : queue) {
       int from = pr[0], to = pr[1];
-      if (numTransferred[from] < Main.N_TRANSFER &&
-        numTransferred[to] < Main.N_TRANSFER &&
-        r.nextDouble() < Main.P_ACCEPT) {
+      if (numTransferred[from] < Main.T_MAX &&
+        numTransferred[to] < Main.T_MAX) {
         ops.add(pr);
         numTransferred[from]++;
         numTransferred[to]++;
