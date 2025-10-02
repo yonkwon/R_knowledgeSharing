@@ -18,7 +18,7 @@ public class Main {
   static final int T_MAX = 1;
 
   //Global Parameters
-  static int M = 200;
+  static int M = 100;
   static int S = 5;
   static int TIME = 1000 + 1;
 
@@ -70,9 +70,7 @@ public class Main {
   static String RUN_ID = "KSMech";
 
   static String PARAMS =
-    "["
-      + "]"
-      + "I"
+       "I"
       + ITERATION
       + "T"
       + TIME

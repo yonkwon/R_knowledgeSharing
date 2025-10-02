@@ -556,6 +556,11 @@ public class Scenario {
   }
 
   void setExposure(){
+    if (countPotentialExposure == null || countEffectiveExposure == null) {
+      potentialExposure = 0;
+      effectiveExposure = 0;
+      return;
+    }
     potentialExposure = 0;
     effectiveExposure = 0;
     for( int focal : focalIndexArray ){
