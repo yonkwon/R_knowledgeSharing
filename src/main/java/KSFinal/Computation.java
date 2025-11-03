@@ -174,7 +174,6 @@ class Computation {
     int workers = Runtime.getRuntime().availableProcessors();
     ExecutorService pool = Executors.newFixedThreadPool(workers, r -> {
       Thread t = new Thread(r);
-      t.setName("experimenter-" + t.getId());
       t.setDaemon(false);
       return t;
     });

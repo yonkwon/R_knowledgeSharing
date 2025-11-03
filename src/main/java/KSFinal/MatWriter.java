@@ -113,7 +113,6 @@ class MatWriter {
         .addArray("para_a_p_s", matrixArrayPSharing)
         .addArray("para_l_net_type", Mat5.newScalar(Main.LENGTH_NETWORK_TYPE))
         .addArray("para_a_net_type", matrixArrayNetworkType)
-        .addArray("para_alpha", Mat5.newScalar(Main.GAMMA))
         .addArray("r_perf_avg", performanceAVG)
         .addArray("r_perf_ssq", performanceSSQ)
         .addArray("r_kbst_avg", knowledgeBestAVG)

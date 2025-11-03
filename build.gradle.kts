@@ -29,7 +29,7 @@ dependencies {
     implementation("gov.nist.math:jama:1.0.3")
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation("com.google.guava:guava:33.4.8-jre")
+    implementation("com.google.guava:guava:33.5.0-jre")
 }
 
 tasks.test {

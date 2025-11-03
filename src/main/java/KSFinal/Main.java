@@ -40,7 +40,6 @@ public class Main {
 //  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
     static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
-  static double GAMMA = 1;  //Connected cavemen scaler
 
   static double[] P_SHARING = new double[]{0, 1};
 //  static double[] P_SHARING = new double[]{0, .1, 1};
@@ -87,8 +86,6 @@ public class Main {
       + ")"
       + "Beta"
       + LENGTH_BETA
-      + "Gamma"
-      + GAMMA
       + "Ps"
       + LENGTH_P_SHARING
       + "Pl"
