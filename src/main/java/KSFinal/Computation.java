@@ -50,19 +50,10 @@ class Computation {
   double[][][][][] beliefSourceDiversityAVG;
   double[][][][][] beliefSourceDiversitySSQ;
 
-  double[][][][][] centralizationAVG;
-  double[][][][][] centralizationSSQ;
-  double[][][][][] centralizationIndividualAVG;
-  double[][][][][] centralizationIndividualSSQ;
   double[][][][][] connectednessAVG;
   double[][][][][] connectednessSSQ;
-
-  double[][][][][] potentialExposureAVG;
-  double[][][][][] potentialExposureSSQ;
-  double[][][][][] effectiveExposureAVG;
-  double[][][][][] effectiveExposureSSQ;
-  double[][][][][] structuralDiscretionAVG;
-  double[][][][][] structuralDiscretionSSQ;
+  double[][][][][] concentrationAVG;
+  double[][][][][] concentrationSSQ;
 
   double[][][][] optimalBetaAVG;
   double[][][][] optimalBetaSSQ;
@@ -143,19 +134,10 @@ class Computation {
     beliefSourceDiversityAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     beliefSourceDiversitySSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
 
-    centralizationAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    centralizationSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    centralizationIndividualAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    centralizationIndividualSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     connectednessAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     connectednessSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-
-    potentialExposureAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    potentialExposureSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    effectiveExposureAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    effectiveExposureSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    structuralDiscretionAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
-    structuralDiscretionSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    concentrationAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    concentrationSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
 
     optimalBetaAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.TIME];
     optimalBetaSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.TIME];
@@ -245,19 +227,10 @@ class Computation {
               beliefSourceDiversityAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
               beliefSourceDiversitySSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
 
-              centralizationAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              centralizationSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              centralizationIndividualAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              centralizationIndividualSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
               connectednessAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
               connectednessSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
-
-              potentialExposureAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              potentialExposureSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              effectiveExposureAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              effectiveExposureSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              structuralDiscretionAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
-              structuralDiscretionSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
+              concentrationAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
+              concentrationSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
 
               for (int n = 0; n < Main.N; n++) {
                 rankContributionAVG[isRatio][nt][ps][b][t][n] /= Main.ITERATION;
@@ -336,20 +309,11 @@ class Computation {
           add(beliefSourceDiversityAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.beliefSourceDiversity);
           add(beliefSourceDiversitySSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.beliefSourceDiversity * sc.beliefSourceDiversity);
 
-          add(centralizationAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.centralization);
-          add(centralizationSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.centralization * sc.centralization);
-          add(centralizationIndividualAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.centralizationIndividual);
-          add(centralizationIndividualSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.centralizationIndividual * sc.centralizationIndividual);
-
           add(connectednessAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.connectedness);
           add(connectednessSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.connectedness * sc.connectedness);
-          
-          add(potentialExposureAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.potentialExposure);
-          add(potentialExposureSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.potentialExposure * sc.potentialExposure);
-          add(effectiveExposureAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.effectiveExposure);
-          add(effectiveExposureSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.effectiveExposure * sc.effectiveExposure);
-          add(structuralDiscretionAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.structuralDiscretion);
-          add(structuralDiscretionSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.structuralDiscretion * sc.structuralDiscretion);
+
+          add(concentrationAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.concentration);
+          add(concentrationSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.concentration * sc.concentration);
 
           for (int n = 0; n < Main.N; n++) {
             double v   = sc.rank0Contribution[n];

@@ -36,14 +36,6 @@ public class Scenario {
   int[] nCorrectBelief0;
   int[] nIncorrectBelief0;
 
-  boolean[][][] isExposedToSourcePotential;
-  boolean[][][] isExposedToSourceEffective;
-  int[][] countPotentialExposure;
-  int[][] countEffectiveExposure;
-  double potentialExposure;
-  double effectiveExposure;
-  double structuralDiscretion;
-
   int[] knowledge;
   int[] knowledge0;
   double[] contributionOf;
@@ -61,9 +53,8 @@ public class Scenario {
   int[] groupOf;
 
   double performance;
-  double centralization;
-  double centralizationIndividual;
   double connectedness;
+  double concentration;
 
   Scenario(boolean isRatio, int networkType, double beta, double pSharing) {
     this.isRatio = isRatio;
@@ -352,65 +343,35 @@ public class Scenario {
 
   void doLearning() {
     int[] numTransferred = new int[Main.N];
-    isExposedToSourceEffective = new boolean[Main.N][Main.M][Main.N];
-    isExposedToSourcePotential = new boolean[Main.N][Main.M][Main.N];
-    countPotentialExposure = new int[Main.N][Main.M];
-    countEffectiveExposure = new int[Main.N][Main.M];
-    structuralDiscretion = 0D;
     List<int[]> queue = new ArrayList<>();
     shuffleFisherYates(focalIndexArray);
+
     for (int focal : focalIndexArray) {
       List<int[]> candidate = new ArrayList<>();
       shuffleFisherYates(neighborList[focal]);
       if (r.nextDouble() < pSharingOf[focal]) {
+        // sharing mode: find the first neighbor with lower knowledge and stop
         for (int target : neighborList[focal]) {
-          for( int m : mIndexArray ){
-            isExposedToSourcePotential[target][m][beliefSource[focal][m]] = true;
-          }
           if (knowledge[focal] > knowledge[target]) {
-            structuralDiscretion++;
-            for( int m : mIndexArray ){
-              isExposedToSourceEffective[target][m][beliefSource[focal][m]] = true;
-            }
             candidate.add(new int[]{focal, target});
+            break; // break as soon as a suitable target is found
           }
         }
       } else {
+        // seeking mode: find the first neighbor with higher knowledge and stop
         for (int target : neighborList[focal]) {
-          for( int m : mIndexArray ){
-            isExposedToSourcePotential[focal][m][beliefSource[target][m]] = true;
-          }
           if (knowledge[focal] < knowledge[target]) {
-            structuralDiscretion++;
-            for( int m : mIndexArray ){
-              isExposedToSourceEffective[focal][m][beliefSource[target][m]] = true;
-            }
             candidate.add(new int[]{target, focal});
+            break; // break as soon as a suitable source is found
           }
         }
       }
-      if(!candidate.isEmpty()){
-        int idx = r.nextInt(candidate.size());
+      if (!candidate.isEmpty()) {
+        int idx = r.nextInt(candidate.size()); // candidate.size() will be 1 in this version
         queue.add(candidate.get(idx));
       }
     }
-
-    for( int focal : focalIndexArray ){
-      for( int m : mIndexArray ){
-        for( int target : targetIndexArray ){
-          if( isExposedToSourcePotential[focal][m][target] ){
-            countPotentialExposure[focal][m] ++;
-          }
-          if( isExposedToSourceEffective[focal][m][target] ){
-            countEffectiveExposure[focal][m] ++;
-          }
-        }
-      }
-    }
-
-    structuralDiscretion /= (double) Main.N;
-
-    Collections.shuffle(queue); // added later
+    Collections.shuffle(queue); // keep the queue shuffle behavior
     List<int[]> ops = new ArrayList<>();
     for (int[] q : queue) {
       int from = q[0], to = q[1];
@@ -484,8 +445,7 @@ public class Scenario {
     setBeliefDiversity();
     setBeliefSourceDiversity();
     setContribution();
-    setCentralization();
-    setExposure();
+    setConcentration();
   }
 
   void setFirmPerformance() {
@@ -543,57 +503,31 @@ public class Scenario {
     }
   }
 
-  void setCentralization() {
-    centralization = 0;
+  void setConcentration() {
     double[] centrality = new double[Main.N];
-    centralizationIndividual = 0;
 
-    // 1. 각 노드의 centrality 계산 (변경 없음)
     for (int focal : focalIndexArray) {
+      double sum = 0;
       for (int target : targetIndexArray) {
-        centrality[focal] += beliefSourceCount[target][focal];
-        double influencePortionOfTarget = beliefSourceCount[target][focal] / (double) Main.M;
-        centralizationIndividual += influencePortionOfTarget * influencePortionOfTarget;
+        sum += beliefSourceCount[target][focal];
       }
+      centrality[focal] = sum / Main.M_N;
     }
-    for (int focal : focalIndexArray) {
-      centrality[focal] /= Main.M_N;
-    }
-    centralizationIndividual /= (double) Main.N;
 
-    // 2. Gini coefficient 계산
+    Arrays.sort(centrality);
+
     double mean = 0;
     for (double c : centrality) mean += c;
     mean /= Main.N;
 
-    double diffSum = 0;
+    double cumSum = 0;
     for (int i = 0; i < Main.N; i++) {
-      for (int j = 0; j < Main.N; j++) {
-        diffSum += Math.abs(centrality[i] - centrality[j]);
-      }
+      cumSum += (2.0 * (i + 1) - Main.N - 1) * centrality[i];
     }
 
-    centralization = diffSum / (2.0 * Main.N * Main.N * mean);
+    concentration = cumSum / (Main.N * Main.N * mean);
   }
 
-
-  void setExposure(){
-    if (countPotentialExposure == null || countEffectiveExposure == null) {
-      potentialExposure = 0;
-      effectiveExposure = 0;
-      return;
-    }
-    potentialExposure = 0;
-    effectiveExposure = 0;
-    for( int focal : focalIndexArray ){
-      for( int m : mIndexArray ){
-        potentialExposure += countPotentialExposure[focal][m];
-        effectiveExposure += countEffectiveExposure[focal][m];
-      }
-    }
-    potentialExposure /= Main.M_N;
-    effectiveExposure /= Main.M_N;
-  }
 
   void shuffleFisherYates(int[] arr) {
     for (int i = arr.length - 1; i > 0; i--) {

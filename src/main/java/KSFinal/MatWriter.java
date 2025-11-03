@@ -27,18 +27,10 @@ class MatWriter {
     Matrix beliefDiversitySSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix beliefSourceDiversityAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix beliefSourceDiversitySSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix centralizationAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix centralizationSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix centralizationIndividualAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix centralizationIndividualSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix concentrationAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix concentrationSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix connectednessAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix connectednessSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix potentialExposureAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix potentialExposureSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix effectiveExposureAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix effectiveExposureSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix structuralDiscretionAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
-    Matrix structuralDiscretionSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix optimalBetaAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_OPTIMAL);
     Matrix optimalBetaSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE_OPTIMAL);
     Matrix rankContributionAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
@@ -72,18 +64,10 @@ class MatWriter {
               beliefDiversitySSQ.setDouble(indices, c.beliefDiversitySSQ[isRatioIdx][nt][ps][b][t]);
               beliefSourceDiversityAVG.setDouble(indices, c.beliefSourceDiversityAVG[isRatioIdx][nt][ps][b][t]);
               beliefSourceDiversitySSQ.setDouble(indices, c.beliefSourceDiversitySSQ[isRatioIdx][nt][ps][b][t]);
-              centralizationAVG.setDouble(indices, c.centralizationAVG[isRatioIdx][nt][ps][b][t]);
-              centralizationSSQ.setDouble(indices, c.centralizationSSQ[isRatioIdx][nt][ps][b][t]);
-              centralizationIndividualAVG.setDouble(indices, c.centralizationIndividualAVG[isRatioIdx][nt][ps][b][t]);
-              centralizationIndividualSSQ.setDouble(indices, c.centralizationIndividualSSQ[isRatioIdx][nt][ps][b][t]);
               connectednessAVG.setDouble(indices, c.connectednessAVG[isRatioIdx][nt][ps][b][t]);
               connectednessSSQ.setDouble(indices, c.connectednessSSQ[isRatioIdx][nt][ps][b][t]);
-              potentialExposureAVG.setDouble(indices, c.potentialExposureAVG[isRatioIdx][nt][ps][b][t]);
-              potentialExposureSSQ.setDouble(indices, c.potentialExposureSSQ[isRatioIdx][nt][ps][b][t]);
-              effectiveExposureAVG.setDouble(indices, c.effectiveExposureAVG[isRatioIdx][nt][ps][b][t]);
-              effectiveExposureSSQ.setDouble(indices, c.effectiveExposureSSQ[isRatioIdx][nt][ps][b][t]);
-              structuralDiscretionAVG.setDouble(indices, c.structuralDiscretionAVG[isRatioIdx][nt][ps][b][t]);
-              structuralDiscretionSSQ.setDouble(indices, c.structuralDiscretionSSQ[isRatioIdx][nt][ps][b][t]);
+              concentrationAVG.setDouble(indices, c.concentrationAVG[isRatioIdx][nt][ps][b][t]);
+              concentrationSSQ.setDouble(indices, c.concentrationSSQ[isRatioIdx][nt][ps][b][t]);
               for (int n = 0; n < Main.N; n++) {
                 int[] indicesRank = {isRatioIdx, nt, b, ps, t, n};
                 rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[isRatioIdx][nt][ps][b][t][n]);
@@ -142,20 +126,12 @@ class MatWriter {
         .addArray("r_bfdv_ssq", beliefDiversitySSQ)
         .addArray("r_bsdv_avg", beliefSourceDiversityAVG)
         .addArray("r_bsdv_ssq", beliefSourceDiversitySSQ)
-        .addArray("r_cent_avg", centralizationAVG)
-        .addArray("r_cent_ssq", centralizationSSQ)
-        .addArray("r_ceni_avg", centralizationIndividualAVG)
-        .addArray("r_ceni_ssq", centralizationIndividualSSQ)
+        .addArray("r_cent_avg", concentrationAVG)
+        .addArray("r_cent_ssq", concentrationSSQ)
         .addArray("r_conn_avg", connectednessAVG)
         .addArray("r_conn_ssq", connectednessSSQ)
         .addArray("r_opti_avg", optimalBetaAVG)
         .addArray("r_opti_ssq", optimalBetaSSQ)
-        .addArray("r_expp_avg", potentialExposureAVG)
-        .addArray("r_expp_ssq", potentialExposureSSQ)
-        .addArray("r_expe_avg", effectiveExposureAVG)
-        .addArray("r_expe_ssq", effectiveExposureSSQ)
-        .addArray("r_strd_avg", structuralDiscretionAVG)
-        .addArray("r_strd_ssq", structuralDiscretionSSQ)
         .addArray("r_r_cont_avg", rankContributionAVG)
         .addArray("r_r_cont_ssq", rankContributionSSQ)
         .addArray("r_r_conp_avg", rankContributionPositiveAVG)
