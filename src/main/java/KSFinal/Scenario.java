@@ -42,6 +42,7 @@ public class Scenario {
   int[][] countEffectiveExposure;
   double potentialExposure;
   double effectiveExposure;
+  double structuralDiscretion;
 
   int[] knowledge;
   int[] knowledge0;
@@ -61,6 +62,7 @@ public class Scenario {
 
   double performance;
   double centralization;
+  double centralizationIndividual;
   double connectedness;
 
   Scenario(boolean isRatio, int networkType, double beta, double pSharing) {
@@ -354,6 +356,7 @@ public class Scenario {
     isExposedToSourcePotential = new boolean[Main.N][Main.M][Main.N];
     countPotentialExposure = new int[Main.N][Main.M];
     countEffectiveExposure = new int[Main.N][Main.M];
+    structuralDiscretion = 0D;
     List<int[]> queue = new ArrayList<>();
     shuffleFisherYates(focalIndexArray);
     for (int focal : focalIndexArray) {
@@ -365,6 +368,7 @@ public class Scenario {
             isExposedToSourcePotential[target][m][beliefSource[focal][m]] = true;
           }
           if (knowledge[focal] > knowledge[target]) {
+            structuralDiscretion++;
             for( int m : mIndexArray ){
               isExposedToSourceEffective[target][m][beliefSource[focal][m]] = true;
             }
@@ -377,6 +381,7 @@ public class Scenario {
             isExposedToSourcePotential[focal][m][beliefSource[target][m]] = true;
           }
           if (knowledge[focal] < knowledge[target]) {
+            structuralDiscretion++;
             for( int m : mIndexArray ){
               isExposedToSourceEffective[focal][m][beliefSource[target][m]] = true;
             }
@@ -402,6 +407,8 @@ public class Scenario {
         }
       }
     }
+
+    structuralDiscretion /= (double) Main.N;
 
     Collections.shuffle(queue); // added later
     List<int[]> ops = new ArrayList<>();
@@ -539,21 +546,36 @@ public class Scenario {
   void setCentralization() {
     centralization = 0;
     double[] centrality = new double[Main.N];
-    double maxCentrality = Double.MIN_VALUE;
+    centralizationIndividual = 0;
+
+    // 1. 각 노드의 centrality 계산 (변경 없음)
     for (int focal : focalIndexArray) {
       for (int target : targetIndexArray) {
         centrality[focal] += beliefSourceCount[target][focal];
+        double influencePortionOfTarget = beliefSourceCount[target][focal] / (double) Main.M;
+        centralizationIndividual += influencePortionOfTarget * influencePortionOfTarget;
       }
     }
     for (int focal : focalIndexArray) {
       centrality[focal] /= Main.M_N;
-      if (centrality[focal] > maxCentrality) maxCentrality = centrality[focal];
     }
-    for (int focal : focalIndexArray) {
-      centralization += (maxCentrality - centrality[focal]);
+    centralizationIndividual /= (double) Main.N;
+
+    // 2. Gini coefficient 계산
+    double mean = 0;
+    for (double c : centrality) mean += c;
+    mean /= Main.N;
+
+    double diffSum = 0;
+    for (int i = 0; i < Main.N; i++) {
+      for (int j = 0; j < Main.N; j++) {
+        diffSum += Math.abs(centrality[i] - centrality[j]);
+      }
     }
-    centralization /= (Main.N - 1);
+
+    centralization = diffSum / (2.0 * Main.N * Main.N * mean);
   }
+
 
   void setExposure(){
     if (countPotentialExposure == null || countEffectiveExposure == null) {
