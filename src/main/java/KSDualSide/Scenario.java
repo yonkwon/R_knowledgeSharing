@@ -136,8 +136,8 @@ public class Scenario {
       nSharer = (int) (pSharing * Main.N);
       nSeeker = Main.N - nSharer;
       shuffleFisherYates(focalIndexArray);
-      for (int n = 0; n < nSharer; n++) pSharingOf[focalIndexArray[n]] = 1D;
-      for (int n = nSharer; n < Main.N; n++) pSharingOf[focalIndexArray[n]] = 0D;
+      for (int n = 0; n < nSharer; n++) pSharingOf[focalIndexArray[n]] = .9D;
+      for (int n = nSharer; n < Main.N; n++) pSharingOf[focalIndexArray[n]] = .1D;
     } else {
       for (int n = 0; n < Main.N; n++) pSharingOf[n] = pSharing;
     }
@@ -352,81 +352,89 @@ public class Scenario {
   }
 
   void doLearning(){
-    List<int[]> ops = new ArrayList<>();
     int[] numTransferred = new int[Main.N];
+    boolean[][] locked = new boolean[Main.N][Main.N];
     List<Integer> isActive = new ArrayList<>();
-    for( int focal : focalIndexArray ){
+    for(int focal : focalIndexArray){
       isActive.add(focal);
     }
+    double[][] weightBase = new double[Main.N][Main.N];
 
-    double[][] weight = new double[Main.N][Main.N];
-    for( int focal : focalIndexArray ){
-      double weightSum = 0;
-      for( int target : neighborList[focal]){
-        weight[focal][target] = getWeight(focal, target);
-        weightSum += weight[focal][target];
-      }
-      for( int target : neighborList[focal]){
-        weight[focal][target] /= weightSum;
-      }
+    // Initial weight initialization
+    for(int i : focalIndexArray){
+      recomputeOutgoing(i, weightBase);
     }
-    for( int focal : focalIndexArray ){
-      for( int target : neighborList[focal]){
-        weight[focal][target] *= weight[target][focal];
-      }
-    }
-
     while(!isActive.isEmpty()){
       int focalIdx = r.nextInt(isActive.size());
       int focal = isActive.get(focalIdx);
-
       int bestTarget = -1;
-      double maxWeight = 0D;
-      for( int target : neighborList[focal] ){
-        if( numTransferred[target] >= Main.T_MAX ){
-          weight[focal][target] = -1;
+      double maxWeightMutual = Double.NEGATIVE_INFINITY;
+
+      for(int target : neighborList[focal]){
+        if(locked[focal][target])
           continue;
-        }
-        if( weight[focal][target] > maxWeight ){
-          maxWeight = weight[focal][target];
+        if(numTransferred[target] >= Main.T_MAX)
+          continue;
+        double mutual = weightBase[focal][target] * weightBase[target][focal];
+        if(mutual > maxWeightMutual){
+          maxWeightMutual = mutual;
           bestTarget = target;
         }
-        if( bestTarget == -1 ){
-          isActive.remove(focalIdx);
+      }
+
+      if(bestTarget != -1 && maxWeightMutual > 0D){
+        int donor;
+        int recipient;
+        if(knowledge[focal] > knowledge[bestTarget]){
+          donor = focal;
+          recipient = bestTarget;
         }else{
-          ops.add(new int[]{focal, target});
-          weight[focal][target] = -1;
+          donor = bestTarget;
+          recipient = focal;
+        }
+
+        doKnowledgeTransfer(donor, recipient);
+        numTransferred[focal]++;
+        numTransferred[bestTarget]++;
+        locked[focal][bestTarget] = true;
+        locked[bestTarget][focal] = true;
+
+        // Recompute only recipient and its neighbors
+        recomputeOutgoing(recipient, weightBase);
+        for(int n : neighborList[recipient]){
+          recomputeOutgoing(n, weightBase);
+        }
+
+        if(numTransferred[bestTarget] >= Main.T_MAX){
+          isActive.remove(Integer.valueOf(bestTarget));
         }
       }
-
-      if( numTransferred[focal] >= Main.T_MAX ){
-        isActive.remove(focalIdx);
+      if(numTransferred[focal] >= Main.T_MAX || bestTarget == -1 || maxWeightMutual <= 0D){
+        isActive.remove(Integer.valueOf(focal));
       }
     }
-
-    Collections.shuffle(ops);
-    for (int[] op : ops) {
-      int i = op[0];
-      int j = op[1];
-      if( knowledge[i] > knowledge[j]){
-        doKnowledgeTransfer(i, j);
-      }else{
-        doKnowledgeTransfer(j, i);
-      }
-    }
-
   }
 
-  double getWeight(int focal, int target){
-    double weight = knowledge[target] - knowledge[focal];
-    if (weight > 0){
-      // Target has better knowledge
-      weight *= (1D - pSharingOf[focal]);
-    }else{
-      // Focal has better knowledge
-      weight *= -pSharingOf[focal];
+  void recomputeOutgoing(int node, double[][] weightBase){
+    double sum = 0D;
+    for(int j : neighborList[node]){
+      double diff = knowledge[j] - knowledge[node];
+      double w;
+      if(diff > 0D){
+        w = (1D - pSharingOf[node]) * diff;
+      }else if(diff < 0D){
+        w = pSharingOf[node] * (-diff);
+      }else{
+        w = 0D;
+      }
+      weightBase[node][j] = w;
+      sum += w;
     }
-    return weight;
+    if(sum > 0D){
+      for(int j : neighborList[node]){
+        weightBase[node][j] /= sum;
+      }
+    }
   }
 
   void doKnowledgeTransfer(int source, int recipient) {
