@@ -1,4 +1,4 @@
-package KSFinal;
+package KSDualSide;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -21,6 +21,7 @@ public class Scenario {
   boolean isNotConverged = true;
   int[] focalIndexArray;
   int[] targetIndexArray;
+  int[][] dyadIndexArray;
   int[] mIndexArray;
 
   int nSharer;
@@ -76,10 +77,19 @@ public class Scenario {
     r = new MersenneTwister();
     focalIndexArray = new int[Main.N];
     targetIndexArray = new int[Main.N];
+    dyadIndexArray = new int[Main.N_DYAD][2];
     mIndexArray = new int[Main.M];
     for (int n = 0; n < Main.N; n++) {
       focalIndexArray[n] = n;
       targetIndexArray[n] = n;
+    }
+    int dyadIndex = 0;
+    for (int i = 0; i < Main.N; i++) {
+      for (int j = i+1; j < Main.N; j++) {
+        dyadIndexArray[dyadIndex][0] = i;
+        dyadIndexArray[dyadIndex][1] = j;
+        dyadIndex ++;
+      }
     }
     for (int m = 0; m < Main.M; m++) {
       mIndexArray[m] = m;
@@ -342,188 +352,81 @@ public class Scenario {
   }
 
   void doLearning(){
-    if(Main.LEARN_FROM_BEST){
-      if(Main.LEARN_FROM_BEST_WITH_COMPROMISE){
-        doLearningBestWithCompromise();
+    List<int[]> ops = new ArrayList<>();
+    int[] numTransferred = new int[Main.N];
+    List<Integer> isActive = new ArrayList<>();
+    for( int focal : focalIndexArray ){
+      isActive.add(focal);
+    }
+
+    double[][] weight = new double[Main.N][Main.N];
+    for( int focal : focalIndexArray ){
+      double weightSum = 0;
+      for( int target : neighborList[focal]){
+        weight[focal][target] = getWeight(focal, target);
+        weightSum += weight[focal][target];
+      }
+      for( int target : neighborList[focal]){
+        weight[focal][target] /= weightSum;
+      }
+    }
+    for( int focal : focalIndexArray ){
+      for( int target : neighborList[focal]){
+        weight[focal][target] *= weight[target][focal];
+      }
+    }
+
+    while(!isActive.isEmpty()){
+      int focalIdx = r.nextInt(isActive.size());
+      int focal = isActive.get(focalIdx);
+
+      int bestTarget = -1;
+      double maxWeight = 0D;
+      for( int target : neighborList[focal] ){
+        if( numTransferred[target] >= Main.T_MAX ){
+          weight[focal][target] = -1;
+          continue;
+        }
+        if( weight[focal][target] > maxWeight ){
+          maxWeight = weight[focal][target];
+          bestTarget = target;
+        }
+        if( bestTarget == -1 ){
+          isActive.remove(focalIdx);
+        }else{
+          ops.add(new int[]{focal, target});
+          weight[focal][target] = -1;
+        }
+      }
+
+      if( numTransferred[focal] >= Main.T_MAX ){
+        isActive.remove(focalIdx);
+      }
+    }
+
+    Collections.shuffle(ops);
+    for (int[] op : ops) {
+      int i = op[0];
+      int j = op[1];
+      if( knowledge[i] > knowledge[j]){
+        doKnowledgeTransfer(i, j);
       }else{
-        doLearningBest();
+        doKnowledgeTransfer(j, i);
       }
+    }
+
+  }
+
+  double getWeight(int focal, int target){
+    double weight = knowledge[target] - knowledge[focal];
+    if (weight > 0){
+      // Target has better knowledge
+      weight *= (1D - pSharingOf[focal]);
     }else{
-      doLearningRandom();
+      // Focal has better knowledge
+      weight *= -pSharingOf[focal];
     }
-  }
-
-  void doLearningBest() {
-
-    int[] numTransferred = new int[Main.N];
-    List<int[]> ops = new ArrayList<>();
-
-    shuffleFisherYates(focalIndexArray);
-
-    for (int focal : focalIndexArray) {
-
-      if (numTransferred[focal] >= Main.T_MAX) continue;
-
-      List<int[]> candidates = new ArrayList<>();
-
-      if (r.nextDouble() < pSharingOf[focal]) {
-        // Sharer: focal -> inferior target
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] > knowledge[target]) {
-            int diff = knowledge[focal] - knowledge[target];
-            candidates.add(new int[]{target, diff});
-          }
-        }
-
-        // diff 내림차순
-        candidates.sort((a, b) -> Integer.compare(b[1], a[1]));
-
-        for (int[] cand : candidates) {
-          int target = cand[0];
-          if (numTransferred[target] < Main.T_MAX) {
-            ops.add(new int[]{focal, target});
-            numTransferred[focal]++;
-            numTransferred[target]++;
-            break;
-          }
-        }
-
-      } else {
-        // Seeker: superior source -> focal
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] < knowledge[target]) {
-            int diff = knowledge[target] - knowledge[focal];
-            candidates.add(new int[]{target, diff});
-          }
-        }
-
-        // diff 내림차순
-        candidates.sort((a, b) -> Integer.compare(b[1], a[1]));
-
-        for (int[] cand : candidates) {
-          int source = cand[0];
-          if (numTransferred[source] < Main.T_MAX) {
-            ops.add(new int[]{source, focal});
-            numTransferred[source]++;
-            numTransferred[focal]++;
-            break;
-          }
-        }
-      }
-    }
-
-    for (int[] op : ops) {
-      doKnowledgeTransfer(op[0], op[1]);
-    }
-  }
-
-  void doLearningBestWithCompromise() {
-
-    int[] numTransferred = new int[Main.N];
-    List<int[]> ops = new ArrayList<>();
-
-    shuffleFisherYates(focalIndexArray);
-
-    for (int focal : focalIndexArray) {
-
-      if (numTransferred[focal] >= Main.T_MAX) continue;
-
-      List<int[]> rankedCandidates = new ArrayList<>();
-
-      if (r.nextDouble() < pSharingOf[focal]) {
-        // Sharer
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] > knowledge[target]) {
-            int diff = knowledge[focal] - knowledge[target];
-            rankedCandidates.add(new int[]{focal, target, diff});
-          }
-        }
-      } else {
-        // Seeker
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] < knowledge[target]) {
-            int diff = knowledge[target] - knowledge[focal];
-            rankedCandidates.add(new int[]{target, focal, diff});
-          }
-        }
-      }
-
-      // diff 기준 내림차순
-      rankedCandidates.sort((a, b) -> Integer.compare(b[2], a[2]));
-
-      int limit = Math.min(Main.COMPROMISE, rankedCandidates.size());
-
-      for (int i = 0; i < limit; i++) {
-        int[] cand = rankedCandidates.get(i);
-        int from = cand[0];
-        int to = cand[1];
-
-        if (numTransferred[from] < Main.T_MAX &&
-                numTransferred[to] < Main.T_MAX) {
-
-          ops.add(new int[]{from, to});
-          numTransferred[from]++;
-          numTransferred[to]++;
-          break;  // 한 번 성공하면 종료
-        }
-      }
-    }
-
-    for (int[] op : ops) {
-      doKnowledgeTransfer(op[0], op[1]);
-    }
-  }
-
-  void doLearningRandom() {
-
-    int[] numTransferred = new int[Main.N];
-    List<int[]> ops = new ArrayList<>();
-
-    shuffleFisherYates(focalIndexArray);
-
-    for (int focal : focalIndexArray) {
-
-      if (numTransferred[focal] >= Main.T_MAX) continue;
-
-      List<int[]> candidates = new ArrayList<>();
-
-      if (r.nextDouble() < pSharingOf[focal]) {
-        // Sharer: focal -> inferior
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] > knowledge[target]) {
-            candidates.add(new int[]{focal, target});
-          }
-        }
-      } else {
-        // Seeker: superior -> focal
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] < knowledge[target]) {
-            candidates.add(new int[]{target, focal});
-          }
-        }
-      }
-
-      // 랜덤 순서로 섞기
-      Collections.shuffle(candidates, (Random) r);
-
-      for (int[] cand : candidates) {
-        int from = cand[0];
-        int to = cand[1];
-
-        if (numTransferred[from] < Main.T_MAX &&
-                numTransferred[to] < Main.T_MAX) {
-
-          ops.add(new int[]{from, to});
-          numTransferred[from]++;
-          numTransferred[to]++;
-          break;
-        }
-      }
-    }
-
-    for (int[] op : ops) {
-      doKnowledgeTransfer(op[0], op[1]);
-    }
+    return weight;
   }
 
   void doKnowledgeTransfer(int source, int recipient) {
@@ -663,6 +566,15 @@ public class Scenario {
     for (int i = arr.length - 1; i > 0; i--) {
       int j = r.nextInt(i + 1);
       int tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+  }
+
+  void shuffleFisherYates(int[][] arr) {
+    for (int i = arr.length - 1; i > 0; i--) {
+      int j = r.nextInt(i + 1);
+      int[] tmp = arr[i];
       arr[i] = arr[j];
       arr[j] = tmp;
     }

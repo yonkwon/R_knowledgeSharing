@@ -1,14 +1,14 @@
-package KSFinal;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.stream.IntStream;
+package KSDualSide;
 
 import us.hebi.matlab.mat.format.Mat5;
 import us.hebi.matlab.mat.format.Mat5File;
 import us.hebi.matlab.mat.types.MatFile;
 import us.hebi.matlab.mat.types.Matrix;
 import us.hebi.matlab.mat.types.Sinks;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.stream.IntStream;
 
 class MatWriter {
 

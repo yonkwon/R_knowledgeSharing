@@ -1,4 +1,4 @@
-package KSFinal;
+package KSDualSide;
 
 import java.io.IOException;
 import java.nio.file.Files;
