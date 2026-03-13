@@ -1,4 +1,4 @@
-package KSFinal;
+package KSSoftMax;
 
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -17,11 +17,13 @@ public class Scenario {
   double beta;
   double pSharing;
   double[] pSharingOf;
+  double tau;
 
   boolean isNotConverged = true;
   int[] focalIndexArray;
   int[] targetIndexArray;
   int[] mIndexArray;
+  double[] softmaxTable;
 
   int nSharer;
   int nSeeker;
@@ -77,12 +79,14 @@ public class Scenario {
     focalIndexArray = new int[Main.N];
     targetIndexArray = new int[Main.N];
     mIndexArray = new int[Main.M];
+    softmaxTable = new double[Main.M];
     for (int n = 0; n < Main.N; n++) {
       focalIndexArray[n] = n;
       targetIndexArray[n] = n;
     }
     for (int m = 0; m < Main.M; m++) {
       mIndexArray[m] = m;
+      softmaxTable[m] = Math.exp(m / tau);
     }
   }
 
@@ -341,164 +345,78 @@ public class Scenario {
     return true;
   }
 
-  void doLearning(){
-    if(Main.LEARN_FROM_BEST){
-      if(Main.LEARN_FROM_BEST_WITH_COMPROMISE){
-        doLearningBestWithCompromise();
-      }else{
-        doLearningBest();
-      }
-    }else{
-      doLearningRandom();
-    }
-  }
-
-  void doLearningBest() {
+  void doLearning() {
     int[] numTransferred = new int[Main.N];
     List<int[]> queue = new ArrayList<>();
     shuffleFisherYates(focalIndexArray);
-
     for (int focal : focalIndexArray) {
       shuffleFisherYates(neighborList[focal]);
-
-      if (r.nextDouble() < pSharingOf[focal]) {
-        int bestTarget = -1;
-        double bestDiff = Double.NEGATIVE_INFINITY;
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] > knowledge[target]) {
-            double diff = knowledge[focal] - knowledge[target];
-            if (diff > bestDiff) {
-              bestDiff = diff;
-              bestTarget = target;
-            }
-          }
-        }
-        if (bestTarget != -1) {
-          queue.add(new int[]{focal, bestTarget});
-        }
-      } else {
-        int bestSource = -1;
-        double bestDiff = Double.NEGATIVE_INFINITY;
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] < knowledge[target]) {
-            double diff = knowledge[target] - knowledge[focal];
-            if (diff > bestDiff) {
-              bestDiff = diff;
-              bestSource = target;
-            }
-          }
-        }
-        if (bestSource != -1) {
-          queue.add(new int[]{bestSource, focal});
-        }
-      }
-    }
-
-    Collections.shuffle(queue);
-    List<int[]> ops = new ArrayList<>();
-    for (int[] q : queue) {
-      int from = q[0], to = q[1];
-      if (numTransferred[from] < Main.T_MAX &&
-              numTransferred[to] < Main.T_MAX) {
-        ops.add(q);
-        numTransferred[from]++;
-        numTransferred[to]++;
-      }
-    }
-
-    for (int[] op : ops) {
-      doKnowledgeTransfer(op[0], op[1]);
-    }
-  }
-
-  void doLearningBestWithCompromise() {
-    int[] numTransferred = new int[Main.N];
-    List<int[]> queue = new ArrayList<>();
-    shuffleFisherYates(focalIndexArray);
-
-    for (int focal : focalIndexArray) {
-      shuffleFisherYates(neighborList[focal]);
-      List<int[]> rankedCandidates = new ArrayList<>();
-
+      List<int[]> candidates = new ArrayList<>();
       if (r.nextDouble() < pSharingOf[focal]) {
         for (int target : neighborList[focal]) {
           if (knowledge[focal] > knowledge[target]) {
             int diff = (int)(knowledge[focal] - knowledge[target]);
-            rankedCandidates.add(new int[]{focal, target, diff});
+            candidates.add(new int[]{focal, target, diff});
           }
         }
-        rankedCandidates.sort((a, b) -> Double.compare(b[2], a[2]));
       } else {
         for (int target : neighborList[focal]) {
           if (knowledge[focal] < knowledge[target]) {
             int diff = (int)(knowledge[target] - knowledge[focal]);
-            rankedCandidates.add(new int[]{target, focal, diff});
-          }
-        }
-        rankedCandidates.sort((a, b) -> Double.compare(b[2], a[2]));
-      }
-      int limit = Math.min(Main.COMPROMISE, rankedCandidates.size());
-      for (int i = 0; i < limit; i++) {
-        int[] cand = rankedCandidates.get(i);
-        int from = cand[0];
-        int to = cand[1];
-        if (numTransferred[from] < Main.T_MAX && numTransferred[to] < Main.T_MAX) {
-          queue.add(new int[]{from, to});
-          numTransferred[from]++;
-          numTransferred[to]++;
-          break;
-        }
-      }
-    }
-
-    for (int[] op : queue) {
-      doKnowledgeTransfer(op[0], op[1]);
-    }
-  }
-
-  void doLearningRandom() {
-    int[] numTransferred = new int[Main.N];
-    List<int[]> queue = new ArrayList<>();
-    shuffleFisherYates(focalIndexArray);
-
-    for (int focal : focalIndexArray) {
-      List<int[]> candidate = new ArrayList<>();
-      shuffleFisherYates(neighborList[focal]);
-      if (r.nextDouble() < pSharingOf[focal]) {
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] > knowledge[target]) {
-            candidate.add(new int[]{focal, target});
-            break;
-          }
-        }
-      } else {
-        for (int target : neighborList[focal]) {
-          if (knowledge[focal] < knowledge[target]) {
-            candidate.add(new int[]{target, focal});
-            break;
+            candidates.add(new int[]{target, focal, diff});
           }
         }
       }
-      if (!candidate.isEmpty()) {
-        int idx = r.nextInt(candidate.size());
-        queue.add(candidate.get(idx));
-      }
+      queue.addAll(sampleTarget(candidates));
     }
     Collections.shuffle(queue);
-    List<int[]> ops = new ArrayList<>();
-    for (int[] q : queue) {
-      int from = q[0], to = q[1];
-      if (numTransferred[from] < Main.T_MAX &&
-        numTransferred[to] < Main.T_MAX) {
-        ops.add(q);
+    for (int[] op : queue) {
+      int from = op[0];
+      int to = op[1];
+      if (numTransferred[from] < Main.MAX_TRANSFER &&
+        numTransferred[to] < Main.MAX_TRANSFER) {
+        doKnowledgeTransfer(from, to);
         numTransferred[from]++;
         numTransferred[to]++;
       }
     }
-
-    for (int[] op : ops) {
-      doKnowledgeTransfer(op[0], op[1]);
+    for( int focal : focalIndexArray ){
+      setKnowledgeOf(focal);
     }
+  }
+
+  List<int[]> sampleTarget(List<int[]> candidates){
+    List<int[]> target = new ArrayList<>();
+    int size = candidates.size();
+    if (size == 0) {
+      return target;
+    }else if (size <= Main.MAX_CONSIDER) {
+      for (int[] cand : candidates) {
+        target.add(new int[]{cand[0], cand[1]});
+      }
+      return target;
+    }
+    double weightSum = 0D;
+    for (int[] cand : candidates) {
+      weightSum += softmaxTable[cand[2]];
+    }
+    for (int sample = 0; sample < Main.MAX_CONSIDER; sample++) {
+      if (weightSum <= 0D) break;
+      double draw = r.nextDouble() * weightSum;
+      double cumulative = 0D;
+      for (int i = 0; i < candidates.size(); i++) {
+        int[] cand = candidates.get(i);
+        double w = softmaxTable[cand[2]];
+        cumulative += w;
+        if (cumulative >= draw) {
+          target.add(new int[]{cand[0], cand[1]});
+          weightSum -= w;
+          candidates.remove(i);
+          break;
+        }
+      }
+    }
+    return target;
   }
 
   void doKnowledgeTransfer(int source, int recipient) {
@@ -513,7 +431,6 @@ public class Scenario {
         beliefSource[recipient][m] = beliefSource[source][m];
         beliefSourceCount[recipient][beliefSource[recipient][m]]++;
       }
-      setKnowledgeOf(recipient);
     }
   }
 
