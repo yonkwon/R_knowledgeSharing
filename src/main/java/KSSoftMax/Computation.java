@@ -51,6 +51,9 @@ class Computation {
   double[][][][][] concentrationAVG;
   double[][][][][] concentrationSSQ;
 
+  double[][][][][] numTransferAVG;
+  double[][][][][] numTransferSSQ;
+
   double[][][][] optimalBetaAVG;
   double[][][][] optimalBetaSSQ;
 
@@ -132,6 +135,9 @@ class Computation {
     connectednessSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     concentrationAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
     concentrationSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+
+    numTransferAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
+    numTransferSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.LENGTH_BETA][Main.TIME];
 
     optimalBetaAVG = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.TIME];
     optimalBetaSSQ = new double[2][Main.LENGTH_NETWORK_TYPE][Main.LENGTH_P_SHARING][Main.TIME];
@@ -223,6 +229,9 @@ class Computation {
               concentrationAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
               concentrationSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
 
+              numTransferAVG[isRatio][nt][ps][b][t] /= Main.ITERATION;
+              numTransferSSQ[isRatio][nt][ps][b][t] /= Main.ITERATION;
+
               for (int n = 0; n < Main.N; n++) {
                 rankContributionAVG[isRatio][nt][ps][b][t][n] /= Main.ITERATION;
                 rankContributionSSQ[isRatio][nt][ps][b][t][n] /= Main.ITERATION;
@@ -305,7 +314,10 @@ class Computation {
 
           add(concentrationAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.concentration);
           add(concentrationSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.concentration * sc.concentration);
-
+          
+          add(numTransferAVG, isRatioIdx, networkType, pSharingIndex, b, t, sc.numTransfer);
+          add(numTransferSSQ, isRatioIdx, networkType, pSharingIndex, b, t, sc.numTransfer * sc.numTransfer);
+          
           for (int n = 0; n < Main.N; n++) {
             double v   = sc.rank0Contribution[n];
             double vp  = sc.rank0ContributionPositive[n];

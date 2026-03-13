@@ -15,16 +15,16 @@ public class Main {
   static final boolean GET_MAT = true;
 
   //Global Parameters
-  static int ITERATION = 10_000;
+  static int ITERATION = 10000;
   static final int MAX_TRANSFER = 1;
-  static final int MAX_CONSIDER = 1;
-  static final double TAU = .1;
-//  static final double TAU = 1;
+  static final int MAX_CONSIDER = 3;
+//  static final double TAU = .1;
+  static final double TAU = 1;
 //  static final double TAU = 10;
 
   static int M = 100;
   static int S = 5;
-  static int TIME = 200 + 1;
+  static int TIME = 500 + 1;
 
   //Network Parameters
   static HashMap<Integer, String> NETWORK_TYPE = new HashMap<Integer, String>() {{
@@ -40,18 +40,18 @@ public class Main {
 
   //Moving Parameters
 //  static double[] BETA = {1};
-  static double[] BETA = {0, 1};
+//  static double[] BETA = {0, 1};
   //  static double[] BETA = new double[]{0, .1, 1};
 //  static double[] BETA = {0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-//    static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+    static double[] BETA = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_BETA = BETA.length;
 
-  //  static double[] P_SHARING = new double[]{0, 1};
+    static double[] P_SHARING = new double[]{0, 1};
 //  static double[] P_SHARING = new double[]{0, .1, 1};
 //  static double[] P_SHARING = new double[]{0, .25, .5};
 //    static double[] P_SHARING = new double[]{0, .25, .5, .75, 1};
 //  static double[] P_SHARING = new double[]{0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1};
-  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
+//  static double[] P_SHARING = {0, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95, 1};
   static int LENGTH_P_SHARING = P_SHARING.length;
 
   static double P_LEARNING = .3;
@@ -72,8 +72,7 @@ public class Main {
     2, LENGTH_NETWORK_TYPE, LENGTH_BETA, LENGTH_P_SHARING, TIME, N
   };
 
-  static String RUN_ID = "KS";
-//  static String RUN_ID = "KSCorRank";
+  static String RUN_ID = "SM";
 
   static String PARAMS =
     "I"

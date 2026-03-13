@@ -31,6 +31,8 @@ class MatWriter {
     Matrix concentrationSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix connectednessAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix connectednessSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix numTransferAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
+    Matrix numTransferSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE);
     Matrix optimalBetaAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_OPTIMAL);
     Matrix optimalBetaSSQ = Mat5.newMatrix(Main.RESULT_KEY_VALUE_OPTIMAL);
     Matrix rankContributionAVG = Mat5.newMatrix(Main.RESULT_KEY_VALUE_RANK);
@@ -68,6 +70,8 @@ class MatWriter {
               connectednessSSQ.setDouble(indices, c.connectednessSSQ[isRatioIdx][nt][ps][b][t]);
               concentrationAVG.setDouble(indices, c.concentrationAVG[isRatioIdx][nt][ps][b][t]);
               concentrationSSQ.setDouble(indices, c.concentrationSSQ[isRatioIdx][nt][ps][b][t]);
+              numTransferAVG.setDouble(indices, c.numTransferAVG[isRatioIdx][nt][ps][b][t]);
+              numTransferSSQ.setDouble(indices, c.numTransferSSQ[isRatioIdx][nt][ps][b][t]);
               for (int n = 0; n < Main.N; n++) {
                 int[] indicesRank = {isRatioIdx, nt, b, ps, t, n};
                 rankContributionAVG.setDouble(indicesRank, c.rankContributionAVG[isRatioIdx][nt][ps][b][t][n]);
@@ -105,7 +109,9 @@ class MatWriter {
         .addArray("para_m", Mat5.newScalar(Main.M))
         .addArray("para_s", Mat5.newScalar(Main.S))
         .addArray("para_p_l", Mat5.newScalar(Main.P_LEARNING))
-        .addArray("para_t_max", Mat5.newScalar(Main.MAX_TRANSFER))
+        .addArray("para_max_t", Mat5.newScalar(Main.MAX_TRANSFER))
+        .addArray("para_max_c", Mat5.newScalar(Main.MAX_CONSIDER))
+        .addArray("para_tau", Mat5.newScalar(Main.TAU))
 
         .addArray("para_l_b", Mat5.newScalar(Main.LENGTH_BETA))
         .addArray("para_a_b", matrixArrayBeta)
@@ -129,6 +135,8 @@ class MatWriter {
         .addArray("r_conc_ssq", concentrationSSQ)
         .addArray("r_conn_avg", connectednessAVG)
         .addArray("r_conn_ssq", connectednessSSQ)
+        .addArray("r_ntra_avg", numTransferAVG)
+        .addArray("r_ntra_ssq", numTransferSSQ)
         .addArray("r_opti_avg", optimalBetaAVG)
         .addArray("r_opti_ssq", optimalBetaSSQ)
         .addArray("r_r_cont_avg", rankContributionAVG)

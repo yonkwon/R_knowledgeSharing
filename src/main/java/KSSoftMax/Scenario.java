@@ -57,6 +57,7 @@ public class Scenario {
   double performance;
   double connectedness;
   double concentration;
+  int numTransfer;
 
   Scenario(boolean isRatio, int networkType, double beta, double pSharing) {
     this.isRatio = isRatio;
@@ -346,6 +347,7 @@ public class Scenario {
   }
 
   void doLearning() {
+    numTransfer = 0;
     int[] numTransferred = new int[Main.N];
     List<int[]> queue = new ArrayList<>();
     shuffleFisherYates(focalIndexArray);
@@ -378,6 +380,7 @@ public class Scenario {
         doKnowledgeTransfer(from, to);
         numTransferred[from]++;
         numTransferred[to]++;
+        numTransfer++;
       }
     }
     for( int focal : focalIndexArray ){
