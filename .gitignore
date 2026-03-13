@@ -3,6 +3,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+/Replication_MS/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -37,6 +38,8 @@ bin/
 
 ### VS Code ###
 .vscode/
+desktop.ini
+Thumbs.db
 
 ### Mac OS ###
 .DS_Store
@@ -44,4 +47,3 @@ bin/
 ### R ###
 .Rhistory
 .RData
-/Replication_MS/

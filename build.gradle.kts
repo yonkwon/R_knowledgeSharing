@@ -42,7 +42,7 @@ tasks.jar {
     archiveFileName.set("ks-$timestamp.jar")
 
     manifest {
-        attributes["Main-Class"] = "KSSoftmax.Main"
+        attributes["Main-Class"] = "KSSoftMax.Main"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from({
